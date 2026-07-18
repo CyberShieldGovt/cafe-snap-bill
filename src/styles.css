@@ -2,6 +2,57 @@
 @source "../src";
 @import "tw-animate-css";
 
+@layer base {
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(3deg); }
+  }
+  @keyframes float-slower {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(-4deg); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes steam {
+    0% { transform: translateY(0) scaleX(1); opacity: 0.7; }
+    100% { transform: translateY(-30px) scaleX(1.6); opacity: 0; }
+  }
+  @keyframes slide-up-fade {
+    0% { transform: translateY(12px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  .animate-float-slow { animation: float-slow 7s ease-in-out infinite; }
+  .animate-float-slower { animation: float-slower 9s ease-in-out infinite; }
+  .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite; }
+  .animate-slide-up { animation: slide-up-fade 0.4s ease-out both; }
+  .animate-steam { animation: steam 2.5s ease-out infinite; }
+  .shimmer-text {
+    background: linear-gradient(90deg, var(--primary) 0%, oklch(0.82 0.17 65) 50%, var(--primary) 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 3s linear infinite;
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, oklch(0.16 0.01 60 / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(0.16 0.01 60 / 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .bg-noise {
+    background-image: radial-gradient(oklch(0.16 0.01 60 / 0.08) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+}
+
+
 @custom-variant dark (&:is(.dark *));
 
 /*
