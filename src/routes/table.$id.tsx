@@ -272,6 +272,7 @@ function TableOrder() {
               onQty={setQty}
               onRemove={(name) => save(lines.filter((l) => l.name !== name))}
               onSave={handleSaveReadd}
+              onPrint={handleSavePrint}
               onSettle={() => setConfirmClear(true)}
               bill={bill}
               qty={qty}
@@ -299,7 +300,7 @@ function TableOrder() {
               className="absolute bottom-0 inset-x-0 rounded-t-3xl bg-card border-t-2 border-border shadow-2xl max-h-[85vh] overflow-auto animate-slide-up"
             >
               <div className="sticky top-0 bg-card p-4 flex items-center justify-between border-b border-border">
-                <div className="font-bold text-lg">Bill · Table {id}</div>
+                <div className="font-bold text-lg">Bill · {tableLabel(id)}</div>
                 <button onClick={() => setShowBill(false)} className="p-2 rounded-full hover:bg-secondary">
                   <X className="w-5 h-5" />
                 </button>
@@ -310,6 +311,7 @@ function TableOrder() {
                   onQty={setQty}
                   onRemove={(name) => save(lines.filter((l) => l.name !== name))}
                   onSave={handleSaveReadd}
+                  onPrint={handleSavePrint}
                   onSettle={() => setConfirmClear(true)}
                   bill={bill}
                   qty={qty}
