@@ -114,7 +114,7 @@ function TableOrder() {
           <div className="h-8 w-px bg-border" />
           <div className="flex-1 min-w-0">
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">BTech Cafe</div>
-            <div className="text-lg font-black text-foreground leading-tight">Table {String(id).padStart(2, "0")}</div>
+            <div className="text-lg font-black text-foreground leading-tight">{tableLabel(id)}</div>
           </div>
           <div className="relative flex-1 max-w-md hidden md:block">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
