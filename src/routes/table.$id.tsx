@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { MENU } from "@/lib/menu";
-import { useTableOrder, total, totalQty, type OrderLine } from "@/lib/orders";
+import { useTableOrder, total, totalQty, tableLabel, type OrderLine } from "@/lib/orders";
+import { createBill } from "@/lib/bills";
+import { printBill } from "@/lib/print";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Minus, Plus, Trash2, Search, X, ChevronRight, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Trash2, Search, X, ChevronRight, ShoppingBag, Printer } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/table/$id")({
@@ -72,7 +74,18 @@ function TableOrder() {
     navigate({ to: "/" });
   };
 
+  const handleSavePrint = () => {
+    if (lines.length === 0) return;
+    save(lines);
+    const b = createBill({ tableId: id, tableLabel: tableLabel(id), lines });
+    printBill(b);
+    toast.success(`Bill ${b.id} printed`, { description: `${tableLabel(id)} · ₹${b.total}` });
+  };
+
   const handleSettle = () => {
+    if (lines.length > 0) {
+      createBill({ tableId: id, tableLabel: tableLabel(id), lines });
+    }
     clear();
     setConfirmClear(false);
     toast.success(`Table ${id} settled`, { description: `Bill ₹${bill} closed` });
@@ -101,7 +114,7 @@ function TableOrder() {
           <div className="h-8 w-px bg-border" />
           <div className="flex-1 min-w-0">
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">BTech Cafe</div>
-            <div className="text-lg font-black text-foreground leading-tight">Table {String(id).padStart(2, "0")}</div>
+            <div className="text-lg font-black text-foreground leading-tight">{tableLabel(id)}</div>
           </div>
           <div className="relative flex-1 max-w-md hidden md:block">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -259,6 +272,7 @@ function TableOrder() {
               onQty={setQty}
               onRemove={(name) => save(lines.filter((l) => l.name !== name))}
               onSave={handleSaveReadd}
+              onPrint={handleSavePrint}
               onSettle={() => setConfirmClear(true)}
               bill={bill}
               qty={qty}
@@ -286,7 +300,7 @@ function TableOrder() {
               className="absolute bottom-0 inset-x-0 rounded-t-3xl bg-card border-t-2 border-border shadow-2xl max-h-[85vh] overflow-auto animate-slide-up"
             >
               <div className="sticky top-0 bg-card p-4 flex items-center justify-between border-b border-border">
-                <div className="font-bold text-lg">Bill · Table {id}</div>
+                <div className="font-bold text-lg">Bill · {tableLabel(id)}</div>
                 <button onClick={() => setShowBill(false)} className="p-2 rounded-full hover:bg-secondary">
                   <X className="w-5 h-5" />
                 </button>
@@ -297,6 +311,7 @@ function TableOrder() {
                   onQty={setQty}
                   onRemove={(name) => save(lines.filter((l) => l.name !== name))}
                   onSave={handleSaveReadd}
+                  onPrint={handleSavePrint}
                   onSettle={() => setConfirmClear(true)}
                   bill={bill}
                   qty={qty}
@@ -418,6 +433,7 @@ function BillPanel({
   onQty,
   onRemove,
   onSave,
+  onPrint,
   onSettle,
   bill,
   qty,
@@ -426,6 +442,7 @@ function BillPanel({
   onQty: (item: { name: string; price: number }, qty: number) => void;
   onRemove: (name: string) => void;
   onSave: () => void;
+  onPrint: () => void;
   onSettle: () => void;
   bill: number;
   qty: number;
@@ -506,6 +523,13 @@ function BillPanel({
           Settle & Clear
         </Button>
       </div>
+      <Button
+        onClick={onPrint}
+        disabled={lines.length === 0}
+        className="w-full h-12 rounded-2xl font-bold bg-foreground text-background hover:bg-foreground/90 flex items-center justify-center gap-2"
+      >
+        <Printer className="w-4 h-4" /> Save & Print
+      </Button>
     </div>
   );
 }

@@ -4,7 +4,29 @@ export type OrderLine = { name: string; price: number; qty: number };
 export type TableOrders = Record<string, OrderLine[]>;
 
 const KEY = "btech-cafe-orders-v1";
-export const TABLE_COUNT = 5;
+
+export type TableDef = { id: string; label: string; short: string };
+
+// Ground floor: 5 tables (id "1".."5" — preserves existing carts)
+export const GROUND_TABLES: TableDef[] = Array.from({ length: 5 }, (_, i) => ({
+  id: String(i + 1),
+  label: `Table ${i + 1}`,
+  short: String(i + 1).padStart(2, "0"),
+}));
+
+// Rooftop: 12 tables (id "R1".."R12")
+export const ROOF_TABLES: TableDef[] = Array.from({ length: 12 }, (_, i) => ({
+  id: `R${i + 1}`,
+  label: `Roof Table ${i + 1}`,
+  short: `R${String(i + 1).padStart(2, "0")}`,
+}));
+
+export const ALL_TABLES: TableDef[] = [...GROUND_TABLES, ...ROOF_TABLES];
+export const TABLE_COUNT = ALL_TABLES.length;
+
+export function tableLabel(id: string) {
+  return ALL_TABLES.find((t) => t.id === id)?.label ?? `Table ${id}`;
+}
 
 function read(): TableOrders {
   if (typeof window === "undefined") return {};

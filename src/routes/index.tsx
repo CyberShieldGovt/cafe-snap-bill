@@ -1,6 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { TABLE_COUNT, useAllOrders, total, totalQty } from "@/lib/orders";
-import { Coffee, Utensils, TrendingUp, Circle } from "lucide-react";
+import {
+  ALL_TABLES,
+  GROUND_TABLES,
+  ROOF_TABLES,
+  useAllOrders,
+  total,
+  totalQty,
+  type TableDef,
+} from "@/lib/orders";
+import { Coffee, Utensils, TrendingUp, Circle, BarChart3 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,11 +24,10 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const orders = useAllOrders();
-  const tables = Array.from({ length: TABLE_COUNT }, (_, i) => i + 1);
 
-  const occupiedCount = tables.filter((n) => (orders[String(n)] || []).length > 0).length;
-  const grandTotal = tables.reduce((s, n) => s + total(orders[String(n)] || []), 0);
-  const itemsServed = tables.reduce((s, n) => s + totalQty(orders[String(n)] || []), 0);
+  const occupiedCount = ALL_TABLES.filter((t) => (orders[t.id] || []).length > 0).length;
+  const grandTotal = ALL_TABLES.reduce((s, t) => s + total(orders[t.id] || []), 0);
+  const itemsServed = ALL_TABLES.reduce((s, t) => s + totalQty(orders[t.id] || []), 0);
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
@@ -31,7 +38,6 @@ function Dashboard() {
         <div className="absolute inset-0 bg-grid opacity-40" />
       </div>
 
-      {/* Hero */}
       <header className="relative">
         <div className="mx-auto max-w-6xl px-6 pt-10 pb-8">
           <div className="flex items-center justify-between mb-10">
@@ -49,12 +55,20 @@ function Dashboard() {
                 <div className="font-bold text-foreground">BTech Cafe</div>
               </div>
             </div>
-            <div className="flex items-center gap-2 rounded-full bg-card border border-border px-3 py-1.5 shadow-sm">
-              <span className="relative flex w-2 h-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-primary/60 animate-pulse-ring" />
-                <span className="relative inline-flex w-2 h-2 rounded-full bg-primary" />
-              </span>
-              <span className="text-xs font-medium text-foreground">Live • Offline mode</span>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/sales"
+                className="flex items-center gap-1.5 rounded-full bg-foreground text-background px-3.5 py-2 text-xs font-bold shadow-sm hover:bg-primary transition"
+              >
+                <BarChart3 className="w-3.5 h-3.5" /> Sales Summary
+              </Link>
+              <div className="flex items-center gap-2 rounded-full bg-card border border-border px-3 py-1.5 shadow-sm">
+                <span className="relative flex w-2 h-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary/60 animate-pulse-ring" />
+                  <span className="relative inline-flex w-2 h-2 rounded-full bg-primary" />
+                </span>
+                <span className="text-xs font-medium text-foreground">Live</span>
+              </div>
             </div>
           </div>
 
@@ -68,130 +82,143 @@ function Dashboard() {
               <span className="shimmer-text">table by table.</span>
             </h1>
             <p className="mt-5 text-lg text-muted-foreground max-w-xl">
-              Tap a table below to take orders, edit bills, or settle up. Everything is saved instantly — no internet needed.
+              Tap a table to take orders, edit bills, print receipts or settle up. Everything saves instantly.
             </p>
           </div>
 
-          {/* Stats */}
           <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4 max-w-2xl">
-            <StatCard icon={<Circle className="w-4 h-4" />} label="Occupied" value={`${occupiedCount}/${TABLE_COUNT}`} accent />
+            <StatCard icon={<Circle className="w-4 h-4" />} label="Occupied" value={`${occupiedCount}/${ALL_TABLES.length}`} accent />
             <StatCard icon={<TrendingUp className="w-4 h-4" />} label="Open bill" value={`₹${grandTotal}`} />
             <StatCard icon={<Utensils className="w-4 h-4" />} label="Items live" value={String(itemsServed)} />
           </div>
         </div>
       </header>
 
-      {/* Tables */}
-      <main className="relative mx-auto max-w-6xl px-6 pb-16">
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Your tables</h2>
-            <p className="text-sm text-muted-foreground">Tap a card to open the order screen.</p>
-          </div>
-          <div className="text-xs text-muted-foreground hidden sm:block">
-            <span className="inline-block w-2 h-2 rounded-full bg-primary mr-1.5 align-middle" />
-            Occupied
-            <span className="inline-block w-2 h-2 rounded-full bg-border mx-1.5 ml-4 align-middle" />
-            Available
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {tables.map((n, i) => {
-            const lines = orders[String(n)] || [];
-            const occupied = lines.length > 0;
-            const amt = total(lines);
-            const qty = totalQty(lines);
-            return (
-              <Link
-                key={n}
-                to="/table/$id"
-                params={{ id: String(n) }}
-                style={{ animationDelay: `${i * 60}ms` }}
-                className={`group relative animate-slide-up rounded-[28px] p-6 overflow-hidden transition-all duration-300 active:scale-[0.98] hover:-translate-y-1 ${
-                  occupied
-                    ? "bg-gradient-to-br from-primary via-primary to-[oklch(0.62_0.19_35)] text-primary-foreground shadow-2xl shadow-primary/40"
-                    : "bg-card text-card-foreground border-2 border-border hover:border-primary/40 hover:shadow-xl"
-                }`}
-              >
-                {/* decorative */}
-                <div
-                  className={`absolute -right-12 -top-12 w-40 h-40 rounded-full ${
-                    occupied ? "bg-primary-foreground/10" : "bg-primary/5"
-                  } transition-transform duration-500 group-hover:scale-125`}
-                />
-                <div
-                  className={`absolute -right-6 -bottom-8 w-28 h-28 rounded-full ${
-                    occupied ? "bg-primary-foreground/5" : "bg-primary/[0.03]"
-                  }`}
-                />
-
-                <div className="relative flex items-start justify-between">
-                  <div>
-                    <div
-                      className={`text-[10px] font-bold uppercase tracking-[0.25em] ${
-                        occupied ? "text-primary-foreground/80" : "text-muted-foreground"
-                      }`}
-                    >
-                      Table No.
-                    </div>
-                    <div className="text-6xl font-black mt-1 leading-none tracking-tighter">
-                      {String(n).padStart(2, "0")}
-                    </div>
-                  </div>
-                  <div
-                    className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full ${
-                      occupied
-                        ? "bg-primary-foreground/20 text-primary-foreground backdrop-blur-sm"
-                        : "bg-secondary text-secondary-foreground"
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${occupied ? "bg-primary-foreground animate-pulse" : "bg-muted-foreground/50"}`}
-                    />
-                    {occupied ? "OCCUPIED" : "AVAILABLE"}
-                  </div>
-                </div>
-
-                <div className="relative mt-10 flex items-end justify-between">
-                  <div>
-                    <div
-                      className={`text-[10px] font-bold uppercase tracking-widest ${
-                        occupied ? "text-primary-foreground/80" : "text-muted-foreground"
-                      }`}
-                    >
-                      Current Bill
-                    </div>
-                    <div className="text-3xl font-black mt-1">₹{amt}</div>
-                    {occupied && (
-                      <div className="text-xs mt-1 text-primary-foreground/80">
-                        {qty} item{qty !== 1 ? "s" : ""} running
-                      </div>
-                    )}
-                  </div>
-                  <div
-                    className={`text-sm font-bold flex items-center gap-1 transition-all group-hover:gap-2 ${
-                      occupied ? "text-primary-foreground" : "text-primary"
-                    }`}
-                  >
-                    {occupied ? "Continue" : "Open"}
-                    <span className="text-lg">→</span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+      <main className="relative mx-auto max-w-6xl px-6 pb-16 space-y-10">
+        <TableSection
+          title="Ground Floor"
+          subtitle="Five tables · quick service"
+          tables={GROUND_TABLES}
+          orders={orders}
+          layout="row"
+        />
+        <TableSection
+          title="Rooftop"
+          subtitle="Twelve tables · open air"
+          tables={ROOF_TABLES}
+          orders={orders}
+          layout="grid"
+        />
 
         <footer className="mt-16 pt-6 border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-          <div>© BTech Cafe • Temporary POS while PetPooja is down</div>
+          <div>© BTech Cafe · Nallurahalli, Bengaluru</div>
           <div className="flex items-center gap-4">
             <span>💾 Auto-saves locally</span>
-            <span>📶 Works offline</span>
+            <span>🖨️ Thermal print ready</span>
           </div>
         </footer>
       </main>
     </div>
+  );
+}
+
+function TableSection({
+  title,
+  subtitle,
+  tables,
+  orders,
+  layout,
+}: {
+  title: string;
+  subtitle: string;
+  tables: TableDef[];
+  orders: Record<string, { name: string; price: number; qty: number }[]>;
+  layout: "row" | "grid";
+}) {
+  const occ = tables.filter((t) => (orders[t.id] || []).length > 0).length;
+  return (
+    <section>
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold">— {title}</div>
+          <h2 className="text-2xl font-black text-foreground leading-tight">{subtitle}</h2>
+        </div>
+        <div className="text-xs font-semibold text-muted-foreground">
+          {occ}/{tables.length} occupied
+        </div>
+      </div>
+      <div
+        className={
+          layout === "row"
+            ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
+            : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
+        }
+      >
+        {tables.map((t, i) => {
+          const lines = orders[t.id] || [];
+          const occupied = lines.length > 0;
+          const amt = total(lines);
+          const qty = totalQty(lines);
+          return (
+            <Link
+              key={t.id}
+              to="/table/$id"
+              params={{ id: t.id }}
+              style={{ animationDelay: `${i * 40}ms` }}
+              className={`group relative animate-slide-up rounded-2xl p-4 overflow-hidden transition-all duration-300 active:scale-[0.98] hover:-translate-y-0.5 ${
+                occupied
+                  ? "bg-gradient-to-br from-primary via-primary to-[oklch(0.62_0.19_35)] text-primary-foreground shadow-lg shadow-primary/30"
+                  : "bg-card text-card-foreground border-2 border-border hover:border-primary/40 hover:shadow-md"
+              }`}
+            >
+              <div
+                className={`absolute -right-8 -top-8 w-24 h-24 rounded-full ${
+                  occupied ? "bg-primary-foreground/10" : "bg-primary/5"
+                } transition-transform duration-500 group-hover:scale-125`}
+              />
+              <div className="relative flex items-start justify-between">
+                <div>
+                  <div
+                    className={`text-[9px] font-bold uppercase tracking-[0.2em] ${
+                      occupied ? "text-primary-foreground/80" : "text-muted-foreground"
+                    }`}
+                  >
+                    Table
+                  </div>
+                  <div className="text-3xl font-black mt-0.5 leading-none tracking-tight">
+                    {t.short}
+                  </div>
+                </div>
+                <span
+                  className={`w-2 h-2 rounded-full ${occupied ? "bg-primary-foreground animate-pulse" : "bg-muted-foreground/40"}`}
+                />
+              </div>
+              <div className="relative mt-4 flex items-end justify-between">
+                <div>
+                  <div className={`text-lg font-black ${occupied ? "" : "text-muted-foreground"}`}>
+                    ₹{amt}
+                  </div>
+                  <div
+                    className={`text-[10px] font-semibold uppercase tracking-wider ${
+                      occupied ? "text-primary-foreground/80" : "text-muted-foreground"
+                    }`}
+                  >
+                    {occupied ? `${qty} item${qty !== 1 ? "s" : ""}` : "Available"}
+                  </div>
+                </div>
+                <span
+                  className={`text-sm font-bold transition-all group-hover:translate-x-0.5 ${
+                    occupied ? "text-primary-foreground" : "text-primary"
+                  }`}
+                >
+                  →
+                </span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
