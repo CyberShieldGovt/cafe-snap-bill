@@ -433,6 +433,7 @@ function BillPanel({
   onQty,
   onRemove,
   onSave,
+  onPrint,
   onSettle,
   bill,
   qty,
@@ -441,6 +442,7 @@ function BillPanel({
   onQty: (item: { name: string; price: number }, qty: number) => void;
   onRemove: (name: string) => void;
   onSave: () => void;
+  onPrint: () => void;
   onSettle: () => void;
   bill: number;
   qty: number;
@@ -521,6 +523,13 @@ function BillPanel({
           Settle & Clear
         </Button>
       </div>
+      <Button
+        onClick={onPrint}
+        disabled={lines.length === 0}
+        className="w-full h-12 rounded-2xl font-bold bg-foreground text-background hover:bg-foreground/90 flex items-center justify-center gap-2"
+      >
+        <Printer className="w-4 h-4" /> Save & Print
+      </Button>
     </div>
   );
 }
