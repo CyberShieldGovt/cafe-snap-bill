@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { MENU } from "@/lib/menu";
-import { useTableOrder, total, totalQty, type OrderLine } from "@/lib/orders";
+import { useTableOrder, total, totalQty, tableLabel, type OrderLine } from "@/lib/orders";
+import { createBill } from "@/lib/bills";
+import { printBill } from "@/lib/print";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Minus, Plus, Trash2, Search, X, ChevronRight, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Trash2, Search, X, ChevronRight, ShoppingBag, Printer } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/table/$id")({
@@ -72,7 +74,18 @@ function TableOrder() {
     navigate({ to: "/" });
   };
 
+  const handleSavePrint = () => {
+    if (lines.length === 0) return;
+    save(lines);
+    const b = createBill({ tableId: id, tableLabel: tableLabel(id), lines });
+    printBill(b);
+    toast.success(`Bill ${b.id} printed`, { description: `${tableLabel(id)} · ₹${b.total}` });
+  };
+
   const handleSettle = () => {
+    if (lines.length > 0) {
+      createBill({ tableId: id, tableLabel: tableLabel(id), lines });
+    }
     clear();
     setConfirmClear(false);
     toast.success(`Table ${id} settled`, { description: `Bill ₹${bill} closed` });
