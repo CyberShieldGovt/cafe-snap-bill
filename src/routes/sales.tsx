@@ -33,7 +33,8 @@ import {
 } from "lucide-react";
 import { useBills, type Bill } from "@/lib/bills";
 import { useAllOrders } from "@/lib/orders";
-import { printBill } from "@/lib/print";
+import { printBill, getPrinterWidth, setPrinterWidth, type PrinterWidth } from "@/lib/print";
+import { Link as RLink } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
