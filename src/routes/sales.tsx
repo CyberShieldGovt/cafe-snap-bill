@@ -116,6 +116,28 @@ function SalesPage() {
   const pendingTables = Object.keys(orders).length;
   const completed = bills.length;
 
+  // Items sold today: sum quantities per item across today's bills
+  const itemsSoldToday = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const b of today) {
+      for (const l of b.lines) {
+        map.set(l.name, (map.get(l.name) || 0) + l.qty);
+      }
+    }
+    return Array.from(map.entries())
+      .map(([name, qty]) => ({ name, qty }))
+      .sort((a, b) => b.qty - a.qty);
+  }, [today]);
+
+  const [printerWidth, setPrinterWidthState] = useState<PrinterWidth>(58);
+  useEffect(() => {
+    setPrinterWidthState(getPrinterWidth());
+  }, []);
+  const changeWidth = (w: PrinterWidth) => {
+    setPrinterWidth(w);
+    setPrinterWidthState(w);
+  };
+
   // Daily chart across preset range
   const chartData = useMemo(() => {
     const start = new Date(Math.max(from, +subDays(new Date(), 29)));
