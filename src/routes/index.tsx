@@ -8,7 +8,7 @@ import {
   totalQty,
   type TableDef,
 } from "@/lib/orders";
-import { Coffee, Utensils, TrendingUp, Circle, BarChart3 } from "lucide-react";
+import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,6 +56,12 @@ function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Link
+                to="/inventory"
+                className="flex items-center gap-1.5 rounded-full bg-card border border-border px-3.5 py-2 text-xs font-bold shadow-sm hover:border-primary/40 text-foreground transition"
+              >
+                <Package className="w-3.5 h-3.5" /> Inventory
+              </Link>
               <Link
                 to="/sales"
                 className="flex items-center gap-1.5 rounded-full bg-foreground text-background px-3.5 py-2 text-xs font-bold shadow-sm hover:bg-primary transition"

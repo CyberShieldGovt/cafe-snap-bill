@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   startOfDay,
   endOfDay,
@@ -33,7 +33,8 @@ import {
 } from "lucide-react";
 import { useBills, type Bill } from "@/lib/bills";
 import { useAllOrders } from "@/lib/orders";
-import { printBill } from "@/lib/print";
+import { printBill, getPrinterWidth, setPrinterWidth, type PrinterWidth } from "@/lib/print";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -115,6 +116,28 @@ function SalesPage() {
   const pendingTables = Object.keys(orders).length;
   const completed = bills.length;
 
+  // Items sold today: sum quantities per item across today's bills
+  const itemsSoldToday = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const b of today) {
+      for (const l of b.lines) {
+        map.set(l.name, (map.get(l.name) || 0) + l.qty);
+      }
+    }
+    return Array.from(map.entries())
+      .map(([name, qty]) => ({ name, qty }))
+      .sort((a, b) => b.qty - a.qty);
+  }, [today]);
+
+  const [printerWidth, setPrinterWidthState] = useState<PrinterWidth>(58);
+  useEffect(() => {
+    setPrinterWidthState(getPrinterWidth());
+  }, []);
+  const changeWidth = (w: PrinterWidth) => {
+    setPrinterWidth(w);
+    setPrinterWidthState(w);
+  };
+
   // Daily chart across preset range
   const chartData = useMemo(() => {
     const start = new Date(Math.max(from, +subDays(new Date(), 29)));
@@ -144,6 +167,27 @@ function SalesPage() {
               BTech Cafe
             </div>
             <div className="text-lg font-black text-foreground leading-tight">Sales Summary</div>
+          </div>
+          <Link
+            to="/inventory"
+            className="hidden sm:flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground transition"
+          >
+            Inventory →
+          </Link>
+          <div className="flex items-center gap-1 bg-secondary rounded-full p-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-2">Printer</span>
+            {([58, 80] as PrinterWidth[]).map((w) => (
+              <button
+                key={w}
+                onClick={() => changeWidth(w)}
+                className={`text-xs font-bold px-2.5 py-1 rounded-full transition ${
+                  printerWidth === w ? "bg-foreground text-background" : "text-foreground"
+                }`}
+                title={`${w}mm receipt`}
+              >
+                {w}mm
+              </button>
+            ))}
           </div>
         </div>
       </header>
@@ -188,6 +232,46 @@ function SalesPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </section>
+
+        {/* Items Sold Today */}
+        <section className="rounded-3xl border-2 border-border bg-card p-5">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— Today</div>
+              <h3 className="text-xl font-black text-foreground">Items Sold Today</h3>
+            </div>
+            <div className="text-xs text-muted-foreground font-semibold">
+              {itemsSoldToday.length} unique · {itemsSoldToday.reduce((s, i) => s + i.qty, 0)} total
+            </div>
+          </div>
+          {itemsSoldToday.length === 0 ? (
+            <div className="text-center py-10 text-muted-foreground rounded-2xl border-2 border-dashed border-border">
+              No items sold yet today.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              {itemsSoldToday.map((it, idx) => (
+                <div
+                  key={it.name}
+                  className={`flex items-center justify-between gap-2 rounded-2xl border-2 px-3 py-2.5 ${
+                    idx === 0
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-secondary/40 border-border"
+                  }`}
+                >
+                  <span className="text-sm font-semibold truncate">{it.name}</span>
+                  <span
+                    className={`shrink-0 text-xs font-black px-2 py-0.5 rounded-full ${
+                      idx === 0 ? "bg-primary text-primary-foreground" : "bg-primary/15 text-primary"
+                    }`}
+                  >
+                    {it.qty}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Bills table */}
