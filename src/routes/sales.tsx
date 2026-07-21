@@ -168,6 +168,27 @@ function SalesPage() {
             </div>
             <div className="text-lg font-black text-foreground leading-tight">Sales Summary</div>
           </div>
+          <Link
+            to="/inventory"
+            className="hidden sm:flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground transition"
+          >
+            Inventory →
+          </Link>
+          <div className="flex items-center gap-1 bg-secondary rounded-full p-1">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-2">Printer</span>
+            {([58, 80] as PrinterWidth[]).map((w) => (
+              <button
+                key={w}
+                onClick={() => changeWidth(w)}
+                className={`text-xs font-bold px-2.5 py-1 rounded-full transition ${
+                  printerWidth === w ? "bg-foreground text-background" : "text-foreground"
+                }`}
+                title={`${w}mm receipt`}
+              >
+                {w}mm
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
