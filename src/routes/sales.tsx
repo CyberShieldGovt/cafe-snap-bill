@@ -234,6 +234,46 @@ function SalesPage() {
           </div>
         </section>
 
+        {/* Items Sold Today */}
+        <section className="rounded-3xl border-2 border-border bg-card p-5">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— Today</div>
+              <h3 className="text-xl font-black text-foreground">Items Sold Today</h3>
+            </div>
+            <div className="text-xs text-muted-foreground font-semibold">
+              {itemsSoldToday.length} unique · {itemsSoldToday.reduce((s, i) => s + i.qty, 0)} total
+            </div>
+          </div>
+          {itemsSoldToday.length === 0 ? (
+            <div className="text-center py-10 text-muted-foreground rounded-2xl border-2 border-dashed border-border">
+              No items sold yet today.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              {itemsSoldToday.map((it, idx) => (
+                <div
+                  key={it.name}
+                  className={`flex items-center justify-between gap-2 rounded-2xl border-2 px-3 py-2.5 ${
+                    idx === 0
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-secondary/40 border-border"
+                  }`}
+                >
+                  <span className="text-sm font-semibold truncate">{it.name}</span>
+                  <span
+                    className={`shrink-0 text-xs font-black px-2 py-0.5 rounded-full ${
+                      idx === 0 ? "bg-primary text-primary-foreground" : "bg-primary/15 text-primary"
+                    }`}
+                  >
+                    {it.qty}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
         {/* Bills table */}
         <section className="rounded-3xl border-2 border-border bg-card p-5">
           <div className="flex flex-wrap items-center gap-3 mb-4">
