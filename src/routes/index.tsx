@@ -46,6 +46,7 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const orders = useAllOrders();
+  const starts = useTableStartedAt();
 
   const occupiedCount = ALL_TABLES.filter((t) => (orders[t.id] || []).length > 0).length;
   const grandTotal = ALL_TABLES.reduce((s, t) => s + total(orders[t.id] || []), 0);
