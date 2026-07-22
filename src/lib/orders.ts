@@ -104,8 +104,7 @@ function bootstrap() {
   supabase
     .channel("table_orders_rt")
     .on(
-      // @ts-expect-error — postgres_changes literal fine
-      "postgres_changes",
+      "postgres_changes" as never,
       { event: "*", schema: "public", table: "table_orders" },
       (payload: {
         eventType: string;
