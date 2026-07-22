@@ -240,6 +240,16 @@ export async function isQzAvailable(): Promise<boolean> {
   }
 }
 
+/**
+ * Convert a byte array (0-255 values) into a raw binary string,
+ * where each character's code point equals the byte value.
+ * This is what QZ Tray's "raw" / "plain" print format expects —
+ * NOT a JSON/array/decimal representation of the bytes.
+ */
+function bytesToRawString(bytes: number[]): string {
+  return bytes.map((b) => String.fromCharCode(b & 0xff)).join("");
+}
+
 export async function printReceiptViaQz(
   bill: ReceiptData,
   widthMm: 58 | 80 = 58
@@ -248,8 +258,15 @@ export async function printReceiptViaQz(
     const qz = await connect();
     const printer = await pickPrinter(qz);
     const bytes = buildReceiptEscPos(bill, widthMm);
+
+    // IMPORTANT: send the bytes as a raw character string, not as a
+    // number array, not as JSON, and not as bytes.toString().
+    // format: "plain" tells QZ Tray to write the string bytes as-is
+    // to the printer, preserving the ESC/POS control codes.
+    const data = bytesToRawString(bytes);
+
     const cfg = qz.configs.create(printer, { encoding: "UTF-8" });
-    await qz.print(cfg, [{ type: "raw", format: "command", data: bytes, flavor: "plain" }]);
+    await qz.print(cfg, [{ type: "raw", format: "plain", data }]);
     return { ok: true, printer };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
