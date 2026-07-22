@@ -130,6 +130,7 @@ function Dashboard() {
           subtitle="Five tables · quick service"
           tables={GROUND_TABLES}
           orders={orders}
+          starts={starts}
           layout="row"
         />
         <TableSection
@@ -137,6 +138,7 @@ function Dashboard() {
           subtitle="Twelve tables · open air"
           tables={ROOF_TABLES}
           orders={orders}
+          starts={starts}
           layout="grid"
         />
 
@@ -157,12 +159,14 @@ function TableSection({
   subtitle,
   tables,
   orders,
+  starts,
   layout,
 }: {
   title: string;
   subtitle: string;
   tables: TableDef[];
   orders: Record<string, { name: string; price: number; qty: number }[]>;
+  starts: Record<string, number>;
   layout: "row" | "grid";
 }) {
   const occ = tables.filter((t) => (orders[t.id] || []).length > 0).length;
@@ -185,7 +189,13 @@ function TableSection({
         }
       >
         {tables.map((t, i) => (
-          <TableCard key={t.id} table={t} lines={orders[t.id] || []} index={i} />
+          <TableCard
+            key={t.id}
+            table={t}
+            lines={orders[t.id] || []}
+            startedAt={starts[t.id]}
+            index={i}
+          />
         ))}
       </div>
     </section>
@@ -204,16 +214,17 @@ function useNowTick(intervalMs = 30_000) {
 function TableCard({
   table: t,
   lines,
+  startedAt,
   index: i,
 }: {
   table: TableDef;
   lines: { name: string; price: number; qty: number }[];
+  startedAt: number | undefined;
   index: number;
 }) {
   const occupied = lines.length > 0;
   const amt = total(lines);
   const qty = totalQty(lines);
-  const startedAt = useTableStartedAt(t.id);
   const now = useNowTick(30_000);
 
   return (
