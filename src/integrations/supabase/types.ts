@@ -14,13 +14,194 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bills: {
+        Row: {
+          created_at: string
+          id: string
+          item_count: number
+          lines: Json
+          status: string
+          table_id: string
+          table_label: string
+          total: number
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          item_count: number
+          lines: Json
+          status?: string
+          table_id: string
+          table_label: string
+          total: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_count?: number
+          lines?: Json
+          status?: string
+          table_id?: string
+          table_label?: string
+          total?: number
+        }
+        Relationships: []
+      }
+      inventory_items: {
+        Row: {
+          id: string
+          low_stock_threshold: number
+          name: string
+          stock: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          low_stock_threshold?: number
+          name: string
+          stock?: number
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          low_stock_threshold?: number
+          name?: string
+          stock?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      menu_categories: {
+        Row: {
+          emoji: string
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          emoji?: string
+          id: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          emoji?: string
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      menu_items: {
+        Row: {
+          category_id: string
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          sort_order: number
+        }
+        Insert: {
+          category_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price: number
+          sort_order?: number
+        }
+        Update: {
+          category_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "menu_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchases: {
+        Row: {
+          entered_at: string
+          id: string
+          image_url: string | null
+          items: Json
+          supplier: string | null
+        }
+        Insert: {
+          entered_at?: string
+          id?: string
+          image_url?: string | null
+          items?: Json
+          supplier?: string | null
+        }
+        Update: {
+          entered_at?: string
+          id?: string
+          image_url?: string | null
+          items?: Json
+          supplier?: string | null
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      table_orders: {
+        Row: {
+          lines: Json
+          started_at: string
+          table_id: string
+          table_label: string
+          updated_at: string
+        }
+        Insert: {
+          lines?: Json
+          started_at?: string
+          table_id: string
+          table_label: string
+          updated_at?: string
+        }
+        Update: {
+          lines?: Json
+          started_at?: string
+          table_id?: string
+          table_label?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      next_bill_number: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
