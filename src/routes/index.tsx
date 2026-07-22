@@ -1,14 +1,36 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ALL_TABLES,
   GROUND_TABLES,
   ROOF_TABLES,
   useAllOrders,
+  useTableStartedAt,
   total,
   totalQty,
   type TableDef,
 } from "@/lib/orders";
-import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package } from "lucide-react";
+import { SyncPill } from "@/components/sync-pill";
+import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package, Clock } from "lucide-react";
+
+function formatElapsed(startMs: number, nowMs: number): string {
+  const diffSec = Math.max(0, Math.floor((nowMs - startMs) / 1000));
+  if (diffSec < 60) return "just now";
+  const mins = Math.floor(diffSec / 60);
+  if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"}`;
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
+  return rem === 0 ? `${hrs} hr${hrs === 1 ? "" : "s"}` : `${hrs} hr ${rem} min${rem === 1 ? "" : "s"}`;
+}
+
+function formatBilledAt(ms: number): string {
+  return new Date(ms).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
