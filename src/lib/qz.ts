@@ -13,7 +13,7 @@
  * Each print job now sends TWO raw slips in one call:
  *   1) The customer bill (with prices)
  *   2) The kitchen KOT (Kitchen Order Ticket — items/qty only, no prices)
- * Both go to the same printer, one after another, each ending with its own cut.
+ * Both go to the same printer, one after another, each ending with its own cut...
  */
 
 type QZApi = {
