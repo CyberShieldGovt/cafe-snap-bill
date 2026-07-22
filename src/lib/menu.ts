@@ -179,6 +179,15 @@ export const MENU: MenuCategory[] = [
       { name: "Cran Berry Mojito", price: 109 },
     ],
   },
+  {
+    id: "extras",
+    name: "Extras",
+    emoji: "➕",
+    items: [
+      { name: "Parcel Charges", price: 10 },
+      { name: "Water Bottle", price: 10 },
+    ],
+  },
 ];
 
 export const ALL_ITEMS: MenuItem[] = MENU.flatMap((c) => c.items);
