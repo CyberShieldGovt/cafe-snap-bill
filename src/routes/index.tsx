@@ -78,6 +78,7 @@ function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <SyncPill />
               <Link
                 to="/inventory"
                 className="flex items-center gap-1.5 rounded-full bg-card border border-border px-3.5 py-2 text-xs font-bold shadow-sm hover:border-primary/40 text-foreground transition"
