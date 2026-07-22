@@ -1,14 +1,36 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ALL_TABLES,
   GROUND_TABLES,
   ROOF_TABLES,
   useAllOrders,
+  useTableStartedAt,
   total,
   totalQty,
   type TableDef,
 } from "@/lib/orders";
-import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package } from "lucide-react";
+import { SyncPill } from "@/components/sync-pill";
+import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package, Clock } from "lucide-react";
+
+function formatElapsed(startMs: number, nowMs: number): string {
+  const diffSec = Math.max(0, Math.floor((nowMs - startMs) / 1000));
+  if (diffSec < 60) return "just now";
+  const mins = Math.floor(diffSec / 60);
+  if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"}`;
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
+  return rem === 0 ? `${hrs} hr${hrs === 1 ? "" : "s"}` : `${hrs} hr ${rem} min${rem === 1 ? "" : "s"}`;
+}
+
+function formatBilledAt(ms: number): string {
+  return new Date(ms).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,6 +46,7 @@ export const Route = createFileRoute("/")({
 
 function Dashboard() {
   const orders = useAllOrders();
+  const starts = useTableStartedAt();
 
   const occupiedCount = ALL_TABLES.filter((t) => (orders[t.id] || []).length > 0).length;
   const grandTotal = ALL_TABLES.reduce((s, t) => s + total(orders[t.id] || []), 0);
@@ -56,6 +79,7 @@ function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <SyncPill />
               <Link
                 to="/inventory"
                 className="flex items-center gap-1.5 rounded-full bg-card border border-border px-3.5 py-2 text-xs font-bold shadow-sm hover:border-primary/40 text-foreground transition"
@@ -106,6 +130,7 @@ function Dashboard() {
           subtitle="Five tables · quick service"
           tables={GROUND_TABLES}
           orders={orders}
+          starts={starts}
           layout="row"
         />
         <TableSection
@@ -113,6 +138,7 @@ function Dashboard() {
           subtitle="Twelve tables · open air"
           tables={ROOF_TABLES}
           orders={orders}
+          starts={starts}
           layout="grid"
         />
 
@@ -133,12 +159,14 @@ function TableSection({
   subtitle,
   tables,
   orders,
+  starts,
   layout,
 }: {
   title: string;
   subtitle: string;
   tables: TableDef[];
   orders: Record<string, { name: string; price: number; qty: number }[]>;
+  starts: Record<string, number>;
   layout: "row" | "grid";
 }) {
   const occ = tables.filter((t) => (orders[t.id] || []).length > 0).length;
@@ -160,71 +188,111 @@ function TableSection({
             : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
         }
       >
-        {tables.map((t, i) => {
-          const lines = orders[t.id] || [];
-          const occupied = lines.length > 0;
-          const amt = total(lines);
-          const qty = totalQty(lines);
-          return (
-            <Link
-              key={t.id}
-              to="/table/$id"
-              params={{ id: t.id }}
-              style={{ animationDelay: `${i * 40}ms` }}
-              className={`group relative animate-slide-up rounded-2xl p-4 overflow-hidden transition-all duration-300 active:scale-[0.98] hover:-translate-y-0.5 ${
-                occupied
-                  ? "bg-gradient-to-br from-primary via-primary to-[oklch(0.62_0.19_35)] text-primary-foreground shadow-lg shadow-primary/30"
-                  : "bg-card text-card-foreground border-2 border-border hover:border-primary/40 hover:shadow-md"
-              }`}
-            >
-              <div
-                className={`absolute -right-8 -top-8 w-24 h-24 rounded-full ${
-                  occupied ? "bg-primary-foreground/10" : "bg-primary/5"
-                } transition-transform duration-500 group-hover:scale-125`}
-              />
-              <div className="relative flex items-start justify-between">
-                <div>
-                  <div
-                    className={`text-[9px] font-bold uppercase tracking-[0.2em] ${
-                      occupied ? "text-primary-foreground/80" : "text-muted-foreground"
-                    }`}
-                  >
-                    Table
-                  </div>
-                  <div className="text-3xl font-black mt-0.5 leading-none tracking-tight">
-                    {t.short}
-                  </div>
-                </div>
-                <span
-                  className={`w-2 h-2 rounded-full ${occupied ? "bg-primary-foreground animate-pulse" : "bg-muted-foreground/40"}`}
-                />
-              </div>
-              <div className="relative mt-4 flex items-end justify-between">
-                <div>
-                  <div className={`text-lg font-black ${occupied ? "" : "text-muted-foreground"}`}>
-                    ₹{amt}
-                  </div>
-                  <div
-                    className={`text-[10px] font-semibold uppercase tracking-wider ${
-                      occupied ? "text-primary-foreground/80" : "text-muted-foreground"
-                    }`}
-                  >
-                    {occupied ? `${qty} item${qty !== 1 ? "s" : ""}` : "Available"}
-                  </div>
-                </div>
-                <span
-                  className={`text-sm font-bold transition-all group-hover:translate-x-0.5 ${
-                    occupied ? "text-primary-foreground" : "text-primary"
-                  }`}
-                >
-                  →
-                </span>
-              </div>
-            </Link>
-          );
-        })}
+        {tables.map((t, i) => (
+          <TableCard
+            key={t.id}
+            table={t}
+            lines={orders[t.id] || []}
+            startedAt={starts[t.id]}
+            index={i}
+          />
+        ))}
       </div>
     </section>
+  );
+}
+
+function useNowTick(intervalMs = 30_000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return now;
+}
+
+function TableCard({
+  table: t,
+  lines,
+  startedAt,
+  index: i,
+}: {
+  table: TableDef;
+  lines: { name: string; price: number; qty: number }[];
+  startedAt: number | undefined;
+  index: number;
+}) {
+  const occupied = lines.length > 0;
+  const amt = total(lines);
+  const qty = totalQty(lines);
+  const now = useNowTick(30_000);
+
+  return (
+    <Link
+      to="/table/$id"
+      params={{ id: t.id }}
+      style={{ animationDelay: `${i * 40}ms` }}
+      className={`group relative animate-slide-up rounded-2xl p-4 overflow-hidden transition-all duration-300 active:scale-[0.98] hover:-translate-y-0.5 ${
+        occupied
+          ? "bg-gradient-to-br from-primary via-primary to-[oklch(0.62_0.19_35)] text-primary-foreground shadow-lg shadow-primary/30"
+          : "bg-card text-card-foreground border-2 border-border hover:border-primary/40 hover:shadow-md"
+      }`}
+    >
+      <div
+        className={`absolute -right-8 -top-8 w-24 h-24 rounded-full ${
+          occupied ? "bg-primary-foreground/10" : "bg-primary/5"
+        } transition-transform duration-500 group-hover:scale-125`}
+      />
+      <div className="relative flex items-start justify-between">
+        <div>
+          <div
+            className={`text-[9px] font-bold uppercase tracking-[0.2em] ${
+              occupied ? "text-primary-foreground/80" : "text-muted-foreground"
+            }`}
+          >
+            Table
+          </div>
+          <div className="text-3xl font-black mt-0.5 leading-none tracking-tight">
+            {t.short}
+          </div>
+        </div>
+        <span
+          className={`w-2 h-2 rounded-full ${occupied ? "bg-primary-foreground animate-pulse" : "bg-muted-foreground/40"}`}
+        />
+      </div>
+      <div className="relative mt-4 flex items-end justify-between">
+        <div>
+          <div className={`text-lg font-black ${occupied ? "" : "text-muted-foreground"}`}>
+            ₹{amt}
+          </div>
+          <div
+            className={`text-[10px] font-semibold uppercase tracking-wider ${
+              occupied ? "text-primary-foreground/80" : "text-muted-foreground"
+            }`}
+          >
+            {occupied ? `${qty} item${qty !== 1 ? "s" : ""}` : "Available"}
+          </div>
+        </div>
+        <span
+          className={`text-sm font-bold transition-all group-hover:translate-x-0.5 ${
+            occupied ? "text-primary-foreground" : "text-primary"
+          }`}
+        >
+          →
+        </span>
+      </div>
+      {occupied && startedAt && (
+        <div
+          className={`relative mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${
+            occupied ? "text-primary-foreground/90" : "text-muted-foreground"
+          }`}
+          title={`Opened at ${formatBilledAt(startedAt)}`}
+        >
+          <Clock className="w-3 h-3" />
+          <span>Elapsed: {formatElapsed(startedAt, now)}</span>
+        </div>
+      )}
+    </Link>
   );
 }
 

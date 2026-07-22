@@ -74,12 +74,21 @@ function TableOrder() {
     navigate({ to: "/" });
   };
 
-  const handleSavePrint = () => {
+  const handleSavePrint = async () => {
     if (lines.length === 0) return;
     save(lines);
     const b = createBill({ tableId: id, tableLabel: tableLabel(id), lines });
-    printBill(b);
-    toast.success(`Bill ${b.id} printed`, { description: `${tableLabel(id)} · ₹${b.total}` });
+    const res = await printBill(b);
+    if (res.ok) {
+      toast.success(`Bill ${b.id} printed`, {
+        description: `${tableLabel(id)} · ₹${b.total} · ${res.printer}`,
+      });
+    } else {
+      toast.error("Printer offline", {
+        description:
+          "Bill saved. Is QZ Tray running and the TVS printer connected? A preview was opened as a fallback.",
+      });
+    }
   };
 
   const handleSettle = () => {
