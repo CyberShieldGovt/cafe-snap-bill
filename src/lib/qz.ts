@@ -9,6 +9,11 @@
  *
  * First time the app prints, QZ shows a one-time trust prompt.
  * Tick "Remember" → Allow, and every subsequent print is silent.
+ *
+ * Each print job now sends TWO raw slips in one call:
+ *   1) The customer bill (with prices)
+ *   2) The kitchen KOT (Kitchen Order Ticket — items/qty only, no prices)
+ * Both go to the same printer, one after another, each ending with its own cut.
  */
 
 type QZApi = {
@@ -116,7 +121,9 @@ type EscPos = {
   center: () => void;
   left: () => void;
   bold: (on: boolean) => void;
-  doubleSize: (on: boolean) => void;
+  doubleSize: (on: boolean) => void; // double width + double height
+  tallSize: (on: boolean) => void; // double height only — width/columns unaffected
+  smallFont: (on: boolean) => void; // ESC/POS Font B — narrower, smaller than the default Font A
   text: (s: string) => void;
   line: (s?: string) => void;
   feed: (n?: number) => void;
@@ -128,11 +135,17 @@ function makeEsc(width = 32): EscPos {
   const buf: number[] = [];
   const push = (...bs: number[]) => buf.push(...bs);
   const api: EscPos = {
-    init: () => push(ESC, 0x40),
+    init: () => {
+      push(ESC, 0x40); // reset printer
+      push(GS, 0x4c, 0x00, 0x00); // GS L: left margin = 0 dots (kills the left-side gap)
+      push(ESC, 0x24, 0x00, 0x00); // ESC $: absolute print position = 0 (belt & suspenders)
+    },
     center: () => push(ESC, 0x61, 0x01),
     left: () => push(ESC, 0x61, 0x00),
     bold: (on) => push(ESC, 0x45, on ? 0x01 : 0x00),
     doubleSize: (on) => push(GS, 0x21, on ? 0x11 : 0x00),
+    tallSize: (on) => push(GS, 0x21, on ? 0x01 : 0x00),
+    smallFont: (on) => push(ESC, 0x4d, on ? 0x01 : 0x00), // ESC M: 0=Font A (normal), 1=Font B (small)
     text: (s) => push(...toBytes(s)),
     line: (s = "") => {
       push(...toBytes(s));
@@ -189,7 +202,9 @@ export function buildReceiptEscPos(bill: ReceiptData, widthMm: 58 | 80 = 58): nu
   e.line("Nallurahalli");
   e.line("Bengaluru");
   e.line("=".repeat(width));
-  e.left();
+  // Whole receipt is center-aligned. Table/detail lines are padded to the
+  // full paper width via padLine(), so centering them has no visual effect
+  // on those rows — only the shorter header/footer lines actually shift.
   e.line(padLine("Invoice", bill.id, width));
   e.line(padLine("Table", bill.tableLabel, width));
   e.line(padLine("Date", bill.date, width));
@@ -204,6 +219,9 @@ export function buildReceiptEscPos(bill: ReceiptData, widthMm: 58 | 80 = 58): nu
   e.bold(false);
   e.line("-".repeat(width));
 
+  // Item lines — printed a bit taller for readability. Height-only scaling
+  // (not width) so the column alignment/padding above is unaffected.
+  e.tallSize(true);
   for (const l of bill.lines) {
     const rowRight = `${String(l.qty).padStart(2)} ${String(l.price).padStart(4)} ${String(
       l.price * l.qty
@@ -212,6 +230,7 @@ export function buildReceiptEscPos(bill: ReceiptData, widthMm: 58 | 80 = 58): nu
     e.line(padLine(nameLines[0], rowRight, width));
     for (let i = 1; i < nameLines.length; i++) e.line(nameLines[i]);
   }
+  e.tallSize(false);
 
   e.line("-".repeat(width));
   e.line(padLine("Subtotal", `Rs.${bill.total}`, width));
@@ -222,10 +241,66 @@ export function buildReceiptEscPos(bill: ReceiptData, widthMm: 58 | 80 = 58): nu
   e.bold(false);
   e.line("=".repeat(width));
   e.center();
+
+  // Footer — smaller font than the bill's item lines (which are tallSize).
+  e.smallFont(true);
+  for (const l of wrap(
+    "We are renovating the cafe, Hyderabadi special dum Irani Chai will be available from August & Chinese too!",
+    width
+  )) {
+    e.line(l);
+  }
+  e.line("");
   e.bold(true);
-  e.line("Thank You");
+  e.line("Thank You!");
   e.bold(false);
+  e.line("Btech Cafe");
   e.line("Visit Again");
+  e.smallFont(false);
+
+  e.feed(3);
+  e.cut();
+  return e.toArray();
+}
+
+/**
+ * Kitchen Order Ticket — goes to the kitchen. No prices, just what to make.
+ * Printed bigger/bolder since it's read at a glance in a busy kitchen.
+ */
+export function buildKotEscPos(bill: ReceiptData, widthMm: 58 | 80 = 58): number[] {
+  const width = widthMm === 80 ? 42 : 32;
+  const e = makeEsc(width);
+  e.init();
+  e.center();
+  e.bold(true);
+  e.doubleSize(true);
+  e.line("KOT");
+  e.doubleSize(false);
+  e.line("Kitchen Order Ticket");
+  e.bold(false);
+  e.line("=".repeat(width));
+  e.left();
+  e.bold(true);
+  e.line(padLine("Invoice", bill.id, width));
+  e.line(padLine("Table", bill.tableLabel, width));
+  e.line(padLine("Time", bill.time, width));
+  e.bold(false);
+  e.line("-".repeat(width));
+
+  // Items only — name + qty, no price/total. Printed tall for kitchen readability.
+  e.bold(true);
+  e.tallSize(true);
+  const nameW = width - 6;
+  for (const l of bill.lines) {
+    const rowRight = `x${l.qty}`;
+    const nameLines = wrap(l.name, nameW);
+    e.line(padLine(nameLines[0], rowRight, width));
+    for (let i = 1; i < nameLines.length; i++) e.line(nameLines[i]);
+  }
+  e.tallSize(false);
+  e.bold(false);
+
+  e.line("=".repeat(width));
   e.feed(3);
   e.cut();
   return e.toArray();
@@ -250,23 +325,34 @@ function bytesToRawString(bytes: number[]): string {
   return bytes.map((b) => String.fromCharCode(b & 0xff)).join("");
 }
 
+/**
+ * Prints the customer bill, then the kitchen KOT, as two slips
+ * in a single job on the same printer (each ends with its own cut).
+ * Pass printKot: false if you only want the bill.
+ */
 export async function printReceiptViaQz(
   bill: ReceiptData,
-  widthMm: 58 | 80 = 58
+  widthMm: 58 | 80 = 58,
+  printKot: boolean = true
 ): Promise<{ ok: true; printer: string } | { ok: false; error: string }> {
   try {
     const qz = await connect();
     const printer = await pickPrinter(qz);
-    const bytes = buildReceiptEscPos(bill, widthMm);
-
-    // IMPORTANT: send the bytes as a raw character string, not as a
-    // number array, not as JSON, and not as bytes.toString().
-    // format: "plain" tells QZ Tray to write the string bytes as-is
-    // to the printer, preserving the ESC/POS control codes.
-    const data = bytesToRawString(bytes);
-
     const cfg = qz.configs.create(printer, { encoding: "UTF-8" });
-    await qz.print(cfg, [{ type: "raw", format: "plain", data }]);
+
+    // Bill first, as its own job.
+    const billData = bytesToRawString(buildReceiptEscPos(bill, widthMm));
+    await qz.print(cfg, [{ type: "raw", format: "plain", data: billData }]);
+
+    // KOT as a second, separate job — sending two entries in a single
+    // qz.print() call was unreliable (some printers/drivers only acted
+    // on the first entry or merged both into one continuous strip).
+    // Two sequential, awaited calls reliably produce two distinct slips.
+    if (printKot) {
+      const kotData = bytesToRawString(buildKotEscPos(bill, widthMm));
+      await qz.print(cfg, [{ type: "raw", format: "plain", data: kotData }]);
+    }
+
     return { ok: true, printer };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
