@@ -75,12 +75,18 @@ export function useSyncStatus() {
 
 async function runOp(op: Op): Promise<boolean> {
   try {
+    // Types are regenerated after migrations; cast to any until then.
+    const sb = supabase as unknown as {
+      from: (t: string) => {
+        upsert: (row: unknown, opts?: { onConflict?: string }) => Promise<{ error: unknown }>;
+        delete: () => { eq: (c: string, v: string) => Promise<{ error: unknown }> };
+      };
+    };
     if (op.kind === "upsert") {
-      const q = supabase.from(op.table).upsert(op.row, { onConflict: op.conflict });
-      const { error } = await q;
+      const { error } = await sb.from(op.table).upsert(op.row, { onConflict: op.conflict });
       if (error) throw error;
     } else {
-      const { error } = await supabase.from(op.table).delete().eq(op.column, op.value);
+      const { error } = await sb.from(op.table).delete().eq(op.column, op.value);
       if (error) throw error;
     }
     return true;
