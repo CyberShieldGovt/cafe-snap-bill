@@ -471,6 +471,10 @@ function BillPanel({
   onSave,
   onPrint,
   onSettle,
+  subtotal,
+  discountPct,
+  onDiscountPctChange,
+  discountAmt,
   bill,
   qty,
 }: {
@@ -480,6 +484,10 @@ function BillPanel({
   onSave: () => void;
   onPrint: (withKot: boolean) => void;
   onSettle: () => void;
+  subtotal: number;
+  discountPct: number;
+  onDiscountPctChange: (n: number) => void;
+  discountAmt: number;
   bill: number;
   qty: number;
 }) {
