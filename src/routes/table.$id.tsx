@@ -455,7 +455,7 @@ function BillPanel({
   onQty: (item: { name: string; price: number }, qty: number) => void;
   onRemove: (name: string) => void;
   onSave: () => void;
-  onPrint: () => void;
+  onPrint: (withKot: boolean) => void;
   onSettle: () => void;
   bill: number;
   qty: number;
@@ -536,13 +536,24 @@ function BillPanel({
           Settle & Clear
         </Button>
       </div>
-      <Button
-        onClick={onPrint}
-        disabled={lines.length === 0}
-        className="w-full h-12 rounded-2xl font-bold bg-foreground text-background hover:bg-foreground/90 flex items-center justify-center gap-2"
-      >
-        <Printer className="w-4 h-4" /> Save & Print
-      </Button>
+      <div className="grid grid-cols-1 gap-2">
+        <Button
+          onClick={() => onPrint(true)}
+          disabled={lines.length === 0}
+          className="w-full h-12 rounded-2xl font-bold bg-foreground text-background hover:bg-foreground/90 flex items-center justify-center gap-2"
+        >
+          <Printer className="w-4 h-4" /> Save & KOT Print
+        </Button>
+        <Button
+          onClick={() => onPrint(false)}
+          disabled={lines.length === 0}
+          variant="outline"
+          className="w-full h-12 rounded-2xl font-bold border-2 flex items-center justify-center gap-2"
+        >
+          <Printer className="w-4 h-4" /> Save & Print (Customer Copy)
+        </Button>
+      </div>
     </div>
   );
 }
+
