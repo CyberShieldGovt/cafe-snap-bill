@@ -541,11 +541,44 @@ function BillPanel({
           ))}
         </div>
       )}
+      <div className="rounded-2xl border-2 border-border bg-secondary/40 p-3 flex items-center gap-3">
+        <label htmlFor="discount-pct" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Discount
+        </label>
+        <div className="relative flex-1">
+          <Input
+            id="discount-pct"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={100}
+            step={1}
+            value={discountPct === 0 ? "" : discountPct}
+            onChange={(e) => {
+              const v = e.target.value === "" ? 0 : parseFloat(e.target.value);
+              onDiscountPctChange(Number.isFinite(v) ? v : 0);
+            }}
+            placeholder="0"
+            className="h-9 pr-8 text-right font-bold"
+            disabled={lines.length === 0}
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">%</span>
+        </div>
+        <div className="text-sm font-bold text-primary whitespace-nowrap">
+          −₹{discountAmt}
+        </div>
+      </div>
       <div className="rounded-2xl bg-foreground text-background p-4">
         <div className="flex items-center justify-between text-xs text-background/70">
           <span>Subtotal</span>
-          <span>₹{bill}</span>
+          <span>₹{subtotal}</span>
         </div>
+        {discountAmt > 0 && (
+          <div className="flex items-center justify-between text-xs text-background/70 mt-1">
+            <span>Discount ({discountPct}%)</span>
+            <span>−₹{discountAmt}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-background/20">
           <span className="font-bold">Grand Total</span>
           <span className="text-2xl font-black text-primary">₹{bill}</span>
