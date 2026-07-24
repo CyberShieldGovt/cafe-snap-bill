@@ -74,14 +74,14 @@ function TableOrder() {
     navigate({ to: "/" });
   };
 
-  const handleSavePrint = async () => {
+  const handleSavePrint = async (withKot: boolean) => {
     if (lines.length === 0) return;
     save(lines);
     const b = createBill({ tableId: id, tableLabel: tableLabel(id), lines });
-    const res = await printBill(b);
+    const res = await printBill(b, withKot);
     if (res.ok) {
       toast.success(`Bill ${b.id} printed`, {
-        description: `${tableLabel(id)} · ₹${b.total} · ${res.printer}`,
+        description: `${tableLabel(id)} · ₹${b.total}${withKot ? " · Bill + KOT" : " · Customer copy"} · ${res.printer}`,
       });
     } else {
       toast.error("Printer offline", {
@@ -89,6 +89,9 @@ function TableOrder() {
           "Bill saved. Is QZ Tray running and the TVS printer connected? A preview was opened as a fallback.",
       });
     }
+    // Auto settle & clear after printing
+    clear();
+    navigate({ to: "/" });
   };
 
   const handleSettle = () => {
@@ -100,6 +103,7 @@ function TableOrder() {
     toast.success(`Table ${id} settled`, { description: `Bill ₹${bill} closed` });
     navigate({ to: "/" });
   };
+
 
   const categoryCount = (catId: string) => {
     const cat = MENU.find((c) => c.id === catId);
