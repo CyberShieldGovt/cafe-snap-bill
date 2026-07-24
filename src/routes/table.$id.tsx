@@ -34,6 +34,7 @@ function TableOrder() {
   const [activeCat, setActiveCat] = useState<string>(MENU[0].id);
   const [confirmClear, setConfirmClear] = useState(false);
   const [showBill, setShowBill] = useState(false);
+  const [discountPct, setDiscountPct] = useState<number>(0);
 
   const qtyOf = (name: string) => lines.find((l) => l.name === name)?.qty || 0;
 
@@ -65,8 +66,20 @@ function TableOrder() {
 
   const currentCategory = MENU.find((c) => c.id === activeCat) || MENU[0];
 
-  const bill = total(lines);
+  const subtotal = total(lines);
+  const safePct = Math.max(0, Math.min(100, Number.isFinite(discountPct) ? discountPct : 0));
+  const discountAmt = Math.round((subtotal * safePct) / 100);
+  const bill = subtotal - discountAmt;
   const qty = totalQty(lines);
+
+  /** Append a synthetic discount line so bill history + printed receipts show it. */
+  const withDiscountLines = (base: OrderLine[]): OrderLine[] => {
+    if (safePct <= 0 || discountAmt <= 0 || base.length === 0) return base;
+    return [
+      ...base,
+      { name: `Discount (${safePct}%)`, price: -discountAmt, qty: 1 },
+    ];
+  };
 
   const handleSaveReadd = () => {
     save(lines);
@@ -77,7 +90,7 @@ function TableOrder() {
   const handleSavePrint = async (withKot: boolean) => {
     if (lines.length === 0) return;
     save(lines);
-    const b = createBill({ tableId: id, tableLabel: tableLabel(id), lines });
+    const b = createBill({ tableId: id, tableLabel: tableLabel(id), lines: withDiscountLines(lines) });
     const res = await printBill(b, withKot);
     if (res.ok) {
       toast.success(`Bill ${b.id} printed`, {
@@ -91,14 +104,16 @@ function TableOrder() {
     }
     // Auto settle & clear after printing
     clear();
+    setDiscountPct(0);
     navigate({ to: "/" });
   };
 
   const handleSettle = () => {
     if (lines.length > 0) {
-      createBill({ tableId: id, tableLabel: tableLabel(id), lines });
+      createBill({ tableId: id, tableLabel: tableLabel(id), lines: withDiscountLines(lines) });
     }
     clear();
+    setDiscountPct(0);
     setConfirmClear(false);
     toast.success(`Table ${id} settled`, { description: `Bill ₹${bill} closed` });
     navigate({ to: "/" });
@@ -287,6 +302,10 @@ function TableOrder() {
               onSave={handleSaveReadd}
               onPrint={handleSavePrint}
               onSettle={() => setConfirmClear(true)}
+              subtotal={subtotal}
+              discountPct={safePct}
+              onDiscountPctChange={setDiscountPct}
+              discountAmt={discountAmt}
               bill={bill}
               qty={qty}
             />
@@ -326,6 +345,10 @@ function TableOrder() {
                   onSave={handleSaveReadd}
                   onPrint={handleSavePrint}
                   onSettle={() => setConfirmClear(true)}
+                  subtotal={subtotal}
+                  discountPct={safePct}
+                  onDiscountPctChange={setDiscountPct}
+                  discountAmt={discountAmt}
                   bill={bill}
                   qty={qty}
                 />
@@ -448,6 +471,10 @@ function BillPanel({
   onSave,
   onPrint,
   onSettle,
+  subtotal,
+  discountPct,
+  onDiscountPctChange,
+  discountAmt,
   bill,
   qty,
 }: {
@@ -457,6 +484,10 @@ function BillPanel({
   onSave: () => void;
   onPrint: (withKot: boolean) => void;
   onSettle: () => void;
+  subtotal: number;
+  discountPct: number;
+  onDiscountPctChange: (n: number) => void;
+  discountAmt: number;
   bill: number;
   qty: number;
 }) {
@@ -510,11 +541,44 @@ function BillPanel({
           ))}
         </div>
       )}
+      <div className="rounded-2xl border-2 border-border bg-secondary/40 p-3 flex items-center gap-3">
+        <label htmlFor="discount-pct" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Discount
+        </label>
+        <div className="relative flex-1">
+          <Input
+            id="discount-pct"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={100}
+            step={1}
+            value={discountPct === 0 ? "" : discountPct}
+            onChange={(e) => {
+              const v = e.target.value === "" ? 0 : parseFloat(e.target.value);
+              onDiscountPctChange(Number.isFinite(v) ? v : 0);
+            }}
+            placeholder="0"
+            className="h-9 pr-8 text-right font-bold"
+            disabled={lines.length === 0}
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">%</span>
+        </div>
+        <div className="text-sm font-bold text-primary whitespace-nowrap">
+          −₹{discountAmt}
+        </div>
+      </div>
       <div className="rounded-2xl bg-foreground text-background p-4">
         <div className="flex items-center justify-between text-xs text-background/70">
           <span>Subtotal</span>
-          <span>₹{bill}</span>
+          <span>₹{subtotal}</span>
         </div>
+        {discountAmt > 0 && (
+          <div className="flex items-center justify-between text-xs text-background/70 mt-1">
+            <span>Discount ({discountPct}%)</span>
+            <span>−₹{discountAmt}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-background/20">
           <span className="font-bold">Grand Total</span>
           <span className="text-2xl font-black text-primary">₹{bill}</span>
