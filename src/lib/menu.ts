@@ -7,6 +7,7 @@ export const MENU: MenuCategory[] = [
     name: "Hot Brews & Boosters",
     emoji: "☕",
     items: [
+      { name: "Tea", price: 20 },
       { name: "Irani Tea", price: 20 },
       { name: "Lemon Tea", price: 20 },
       { name: "Black Tea", price: 20 },
@@ -186,6 +187,7 @@ export const MENU: MenuCategory[] = [
     items: [
       { name: "Parcel Charges", price: 10 },
       { name: "Water Bottle", price: 10 },
+      { name: "Niloufer Usmania Biscuits", price: 10 },
     ],
   },
 ];

@@ -240,7 +240,13 @@ export function buildReceiptEscPos(bill: ReceiptData, widthMm: 58 | 80 = 58): nu
   e.bold(true);
   e.line("Thank You");
   e.bold(false);
+  e.line("We are renovating");
+  e.line("Introducing Irani Chai &");
+  e.line("Chinese available from August");
+  e.feed(1);
+  e.bold(true);
   e.line("Visit Again");
+  e.bold(false);
   e.feed(3);
   e.cut();
   return e.toArray();
