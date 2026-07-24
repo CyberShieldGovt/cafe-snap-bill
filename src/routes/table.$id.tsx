@@ -66,8 +66,20 @@ function TableOrder() {
 
   const currentCategory = MENU.find((c) => c.id === activeCat) || MENU[0];
 
-  const bill = total(lines);
+  const subtotal = total(lines);
+  const safePct = Math.max(0, Math.min(100, Number.isFinite(discountPct) ? discountPct : 0));
+  const discountAmt = Math.round((subtotal * safePct) / 100);
+  const bill = subtotal - discountAmt;
   const qty = totalQty(lines);
+
+  /** Append a synthetic discount line so bill history + printed receipts show it. */
+  const withDiscountLines = (base: OrderLine[]): OrderLine[] => {
+    if (safePct <= 0 || discountAmt <= 0 || base.length === 0) return base;
+    return [
+      ...base,
+      { name: `Discount (${safePct}%)`, price: -discountAmt, qty: 1 },
+    ];
+  };
 
   const handleSaveReadd = () => {
     save(lines);
@@ -78,7 +90,7 @@ function TableOrder() {
   const handleSavePrint = async (withKot: boolean) => {
     if (lines.length === 0) return;
     save(lines);
-    const b = createBill({ tableId: id, tableLabel: tableLabel(id), lines });
+    const b = createBill({ tableId: id, tableLabel: tableLabel(id), lines: withDiscountLines(lines) });
     const res = await printBill(b, withKot);
     if (res.ok) {
       toast.success(`Bill ${b.id} printed`, {
@@ -92,14 +104,16 @@ function TableOrder() {
     }
     // Auto settle & clear after printing
     clear();
+    setDiscountPct(0);
     navigate({ to: "/" });
   };
 
   const handleSettle = () => {
     if (lines.length > 0) {
-      createBill({ tableId: id, tableLabel: tableLabel(id), lines });
+      createBill({ tableId: id, tableLabel: tableLabel(id), lines: withDiscountLines(lines) });
     }
     clear();
+    setDiscountPct(0);
     setConfirmClear(false);
     toast.success(`Table ${id} settled`, { description: `Bill ₹${bill} closed` });
     navigate({ to: "/" });
