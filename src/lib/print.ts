@@ -323,18 +323,19 @@ export async function printReceiptViaQz(
     const printer = await pickPrinter(qz);
     const cfg = qz.configs.create(printer, { encoding: "UTF-8" });
 
-    const jobs: { type: string; format: string; data: string }[] = [
-      { type: "raw", format: "plain", data: bytesToRawString(buildReceiptEscPos(bill, widthMm)) },
-    ];
+    // Bill first, as its own job.
+    const billData = bytesToRawString(buildReceiptEscPos(bill, widthMm));
+    await qz.print(cfg, [{ type: "raw", format: "plain", data: billData }]);
+
+    // KOT as a second, separate job — sending both in one qz.print() call
+    // was unreliable (some printers/drivers only acted on the first entry
+    // or merged both into one continuous strip). Two sequential awaited
+    // calls reliably produce two distinct slips.
     if (printKot) {
-      jobs.push({
-        type: "raw",
-        format: "plain",
-        data: bytesToRawString(buildKotEscPos(bill, widthMm)),
-      });
+      const kotData = bytesToRawString(buildKotEscPos(bill, widthMm));
+      await qz.print(cfg, [{ type: "raw", format: "plain", data: kotData }]);
     }
 
-    await qz.print(cfg, jobs);
     return { ok: true, printer };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
