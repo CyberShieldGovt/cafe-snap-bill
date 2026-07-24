@@ -302,6 +302,10 @@ function TableOrder() {
               onSave={handleSaveReadd}
               onPrint={handleSavePrint}
               onSettle={() => setConfirmClear(true)}
+              subtotal={subtotal}
+              discountPct={safePct}
+              onDiscountPctChange={setDiscountPct}
+              discountAmt={discountAmt}
               bill={bill}
               qty={qty}
             />
