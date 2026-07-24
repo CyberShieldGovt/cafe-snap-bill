@@ -323,21 +323,90 @@ export async function printReceiptViaQz(
     const printer = await pickPrinter(qz);
     const cfg = qz.configs.create(printer, { encoding: "UTF-8" });
 
-    const jobs: { type: string; format: string; data: string }[] = [
-      { type: "raw", format: "plain", data: bytesToRawString(buildReceiptEscPos(bill, widthMm)) },
-    ];
+    // Bill first, as its own job.
+    const billData = bytesToRawString(buildReceiptEscPos(bill, widthMm));
+    await qz.print(cfg, [{ type: "raw", format: "plain", data: billData }]);
+
+    // KOT as a second, separate job — sending both in one qz.print() call
+    // was unreliable (some printers/drivers only acted on the first entry
+    // or merged both into one continuous strip). Two sequential awaited
+    // calls reliably produce two distinct slips.
     if (printKot) {
-      jobs.push({
-        type: "raw",
-        format: "plain",
-        data: bytesToRawString(buildKotEscPos(bill, widthMm)),
-      });
+      const kotData = bytesToRawString(buildKotEscPos(bill, widthMm));
+      await qz.print(cfg, [{ type: "raw", format: "plain", data: kotData }]);
     }
 
-    await qz.print(cfg, jobs);
     return { ok: true, printer };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return { ok: false, error: msg };
   }
+}
+
+// -------- Printer width preference --------
+export type PrinterWidth = 58 | 80;
+const WIDTH_KEY = "btech-cafe-printer-width-v1";
+
+export function getPrinterWidth(): PrinterWidth {
+  if (typeof window === "undefined") return 58;
+  const v = parseInt(localStorage.getItem(WIDTH_KEY) || "58", 10);
+  return v === 80 ? 80 : 58;
+}
+export function setPrinterWidth(w: PrinterWidth) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(WIDTH_KEY, String(w));
+}
+
+// -------- Bill → receipt adapter --------
+type BillLike = {
+  id: string;
+  tableLabel: string;
+  lines: { name: string; price: number; qty: number }[];
+  total: number;
+  date?: string;
+  time?: string;
+  createdAt?: number;
+};
+
+/**
+ * Print a saved bill directly via QZ Tray (bill + KOT). Falls back to a
+ * plain-text preview window when QZ Tray is unavailable so staff still
+ * have something to hand the customer.
+ */
+export async function printBill(
+  bill: BillLike,
+  printKot: boolean = true
+): Promise<{ ok: true; printer: string } | { ok: false; error: string }> {
+  const width = getPrinterWidth();
+  const created = bill.createdAt ? new Date(bill.createdAt) : new Date();
+  const receipt: ReceiptData = {
+    id: bill.id,
+    tableLabel: bill.tableLabel,
+    date: bill.date ?? created.toLocaleDateString(),
+    time: bill.time ?? created.toLocaleTimeString(),
+    lines: bill.lines,
+    total: bill.total,
+  };
+  const res = await printReceiptViaQz(receipt, width, printKot);
+  if (!res.ok && typeof window !== "undefined") {
+    // Offline fallback — open a plain text preview in a new tab.
+    try {
+      const w = window.open("", "_blank");
+      if (w) {
+        const text =
+          `BTECH CAFE\nNallurahalli, Bengaluru\n` +
+          `Invoice: ${receipt.id}   Table: ${receipt.tableLabel}\n` +
+          `${receipt.date} ${receipt.time}\n\n` +
+          receipt.lines
+            .map((l) => `${l.name}  x${l.qty}  ₹${l.price * l.qty}`)
+            .join("\n") +
+          `\n\nTOTAL: ₹${receipt.total}\n`;
+        w.document.write(`<pre style="font:14px monospace;padding:16px">${text}</pre>`);
+        w.document.close();
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return res;
 }
