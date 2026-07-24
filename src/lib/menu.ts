@@ -187,6 +187,7 @@ export const MENU: MenuCategory[] = [
     items: [
       { name: "Parcel Charges", price: 10 },
       { name: "Water Bottle", price: 10 },
+      { name: "Niloufer Usmania Biscuits", price: 10 },
     ],
   },
 ];
