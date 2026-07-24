@@ -34,6 +34,7 @@ function TableOrder() {
   const [activeCat, setActiveCat] = useState<string>(MENU[0].id);
   const [confirmClear, setConfirmClear] = useState(false);
   const [showBill, setShowBill] = useState(false);
+  const [discountPct, setDiscountPct] = useState<number>(0);
 
   const qtyOf = (name: string) => lines.find((l) => l.name === name)?.qty || 0;
 
