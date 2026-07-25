@@ -148,20 +148,20 @@ function TableSection({
   const occ = tables.filter((t) => (orders[t.id] || []).length > 0).length;
   return (
     <section>
-      <div className="flex items-end justify-between mb-4">
+      <div className="flex items-end justify-between mb-2">
         <div>
-          <div className="text-[10px] uppercase tracking-[0.25em] text-primary font-bold">— {title}</div>
-          <h2 className="text-2xl font-black text-foreground leading-tight">{subtitle}</h2>
+          <div className="text-[9px] uppercase tracking-[0.25em] text-primary font-bold">— {title}</div>
+          <h2 className="text-sm font-black text-foreground leading-tight">{subtitle}</h2>
         </div>
-        <div className="text-xs font-semibold text-muted-foreground">
+        <div className="text-[11px] font-semibold text-muted-foreground">
           {occ}/{tables.length} occupied
         </div>
       </div>
       <div
         className={
           layout === "row"
-            ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
-            : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
+            ? "grid grid-cols-3 sm:grid-cols-5 gap-2"
+            : "grid grid-cols-4 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6 gap-2"
         }
       >
         {tables.map((t, i) => (
@@ -207,65 +207,44 @@ function TableCard({
     <Link
       to="/table/$id"
       params={{ id: t.id }}
-      style={{ animationDelay: `${i * 40}ms` }}
-      className={`group relative animate-slide-up rounded-2xl p-4 overflow-hidden transition-all duration-300 active:scale-[0.98] hover:-translate-y-0.5 ${
+      style={{ animationDelay: `${i * 25}ms` }}
+      className={`group relative animate-slide-up rounded-xl p-2.5 overflow-hidden transition-all duration-300 active:scale-[0.98] hover:-translate-y-0.5 ${
         occupied
-          ? "bg-gradient-to-br from-primary via-primary to-[oklch(0.62_0.19_35)] text-primary-foreground shadow-lg shadow-primary/30"
-          : "bg-card text-card-foreground border-2 border-border hover:border-primary/40 hover:shadow-md"
+          ? "bg-gradient-to-br from-primary via-primary to-[oklch(0.62_0.19_35)] text-primary-foreground shadow-md shadow-primary/25"
+          : "bg-card text-card-foreground border border-border hover:border-primary/40 hover:shadow-sm"
       }`}
     >
-      <div
-        className={`absolute -right-8 -top-8 w-24 h-24 rounded-full ${
-          occupied ? "bg-primary-foreground/10" : "bg-primary/5"
-        } transition-transform duration-500 group-hover:scale-125`}
-      />
       <div className="relative flex items-start justify-between">
-        <div>
-          <div
-            className={`text-[9px] font-bold uppercase tracking-[0.2em] ${
-              occupied ? "text-primary-foreground/80" : "text-muted-foreground"
-            }`}
-          >
-            Table
-          </div>
-          <div className="text-3xl font-black mt-0.5 leading-none tracking-tight">
-            {t.short}
-          </div>
+        <div className="text-xl font-black leading-none tracking-tight">
+          {t.short}
         </div>
         <span
-          className={`w-2 h-2 rounded-full ${occupied ? "bg-primary-foreground animate-pulse" : "bg-muted-foreground/40"}`}
+          className={`w-1.5 h-1.5 rounded-full mt-1 ${occupied ? "bg-primary-foreground animate-pulse" : "bg-muted-foreground/40"}`}
         />
       </div>
-      <div className="relative mt-4 flex items-end justify-between">
-        <div>
-          <div className={`text-lg font-black ${occupied ? "" : "text-muted-foreground"}`}>
+      <div className="relative mt-2 flex items-end justify-between gap-1">
+        <div className="min-w-0">
+          <div className={`text-sm font-black leading-none ${occupied ? "" : "text-muted-foreground"}`}>
             ₹{amt}
           </div>
           <div
-            className={`text-[10px] font-semibold uppercase tracking-wider ${
+            className={`text-[9px] font-semibold uppercase tracking-wider mt-0.5 truncate ${
               occupied ? "text-primary-foreground/80" : "text-muted-foreground"
             }`}
           >
-            {occupied ? `${qty} item${qty !== 1 ? "s" : ""}` : "Available"}
+            {occupied ? `${qty} item${qty !== 1 ? "s" : ""}` : "Free"}
           </div>
         </div>
-        <span
-          className={`text-sm font-bold transition-all group-hover:translate-x-0.5 ${
-            occupied ? "text-primary-foreground" : "text-primary"
-          }`}
-        >
-          →
-        </span>
       </div>
       {occupied && startedAt && (
         <div
-          className={`relative mt-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${
+          className={`relative mt-1.5 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider ${
             occupied ? "text-primary-foreground/90" : "text-muted-foreground"
           }`}
           title={`Opened at ${formatBilledAt(startedAt)}`}
         >
-          <Clock className="w-3 h-3" />
-          <span>Elapsed: {formatElapsed(startedAt, now)}</span>
+          <Clock className="w-2.5 h-2.5" />
+          <span className="truncate">{formatElapsed(startedAt, now)}</span>
         </div>
       )}
     </Link>
@@ -285,16 +264,16 @@ function StatCard({
 }) {
   return (
     <div
-      className={`rounded-2xl p-4 border ${
+      className={`rounded-xl px-3 py-1.5 border min-w-[88px] ${
         accent
           ? "bg-foreground text-background border-foreground"
           : "bg-card text-card-foreground border-border"
       }`}
     >
-      <div className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${accent ? "text-background/70" : "text-muted-foreground"}`}>
+      <div className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest ${accent ? "text-background/70" : "text-muted-foreground"}`}>
         {icon} {label}
       </div>
-      <div className="text-2xl font-black mt-1">{value}</div>
+      <div className="text-base font-black leading-tight mt-0.5">{value}</div>
     </div>
   );
 }
