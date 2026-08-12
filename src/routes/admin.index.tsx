@@ -125,6 +125,22 @@ function Dashboard() {
           starts={starts}
           layout="grid"
         />
+        <TableSection
+          title="Smoke Zone"
+          subtitle="Five spots · smoking area"
+          tables={SMOKE_TABLES}
+          orders={orders}
+          starts={starts}
+          layout="row"
+        />
+        <TableSection
+          title="Takeaway"
+          subtitle="Five counters · parcel orders"
+          tables={TAKEAWAY_TABLES}
+          orders={orders}
+          starts={starts}
+          layout="row"
+        />
       </main>
     </div>
   );
