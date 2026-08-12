@@ -49,6 +49,7 @@ function MenuPage() {
           </div>
           <Link
             to="/order"
+            search={{ qr: undefined }}
             className="ml-auto flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground"
           >
             <QrCode className="size-3.5" /> Order

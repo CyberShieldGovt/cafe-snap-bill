@@ -62,6 +62,7 @@ function Landing() {
             </Link>
             <Link
               to="/order"
+              search={{ qr: undefined }}
               className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/25 transition hover:brightness-110"
             >
               <QrCode className="size-3.5" /> Order now
@@ -94,6 +95,7 @@ function Landing() {
           <div className="mt-7 flex flex-wrap gap-3">
             <Link
               to="/order"
+              search={{ qr: undefined }}
               className="group flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-xl shadow-primary/30 transition hover:brightness-110"
             >
               <QrCode className="size-4" /> Order from your table
