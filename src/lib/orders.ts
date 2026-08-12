@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { cloudUpsert, cloudDelete, startCloudSync } from "./cloud-sync";
+import { cloudUpsert, cloudDelete, startCloudSync, pendingKeys, flushNow } from "./cloud-sync";
 
 export type OrderLine = { name: string; price: number; qty: number };
 export type TableOrders = Record<string, OrderLine[]>;
