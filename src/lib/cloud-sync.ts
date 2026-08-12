@@ -143,6 +143,31 @@ export function cloudDelete(table: string, column: string, value: string) {
   enqueue({ kind: "delete", table, column, value });
 }
 
+/**
+ * Keys (identified by `keyCol`) for a table that still have un-synced local
+ * writes. Callers use this to avoid overwriting local edits when they pull
+ * authoritative state from the cloud.
+ */
+export function pendingKeys(table: string, keyCol: string): Set<string> {
+  const out = new Set<string>();
+  for (const op of queue) {
+    if (op.table !== table) continue;
+    if (op.kind === "upsert") {
+      const v = op.row[keyCol];
+      if (typeof v === "string") out.add(v);
+    } else if (op.column === keyCol) {
+      out.add(op.value);
+    }
+  }
+  return out;
+}
+
+/** Flush any queued writes right now (e.g. on tab focus). */
+export function flushNow() {
+  online = typeof navigator !== "undefined" ? navigator.onLine : true;
+  void flush();
+}
+
 // One-time bootstrap on the client
 let started = false;
 export function startCloudSync() {
