@@ -4,6 +4,8 @@ import {
   ALL_TABLES,
   GROUND_TABLES,
   ROOF_TABLES,
+  SMOKE_TABLES,
+  TAKEAWAY_TABLES,
   useAllOrders,
   useTableStartedAt,
   total,
