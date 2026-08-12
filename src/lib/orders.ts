@@ -24,7 +24,26 @@ export const ROOF_TABLES: TableDef[] = Array.from({ length: 12 }, (_, i) => ({
   short: `R${String(i + 1).padStart(2, "0")}`,
 }));
 
-export const ALL_TABLES: TableDef[] = [...GROUND_TABLES, ...ROOF_TABLES];
+// Smoke Zone: 5 spots (id "S1".."S5")
+export const SMOKE_TABLES: TableDef[] = Array.from({ length: 5 }, (_, i) => ({
+  id: `S${i + 1}`,
+  label: `Smoke Zone ${i + 1}`,
+  short: `S${i + 1}`,
+}));
+
+// Takeaway counters: 5 slots (id "T1".."T5")
+export const TAKEAWAY_TABLES: TableDef[] = Array.from({ length: 5 }, (_, i) => ({
+  id: `T${i + 1}`,
+  label: `Takeaway ${i + 1}`,
+  short: `T${i + 1}`,
+}));
+
+export const ALL_TABLES: TableDef[] = [
+  ...GROUND_TABLES,
+  ...ROOF_TABLES,
+  ...SMOKE_TABLES,
+  ...TAKEAWAY_TABLES,
+];
 export const TABLE_COUNT = ALL_TABLES.length;
 
 export function tableLabel(id: string) {
