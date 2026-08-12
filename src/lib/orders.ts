@@ -77,8 +77,50 @@ function writeStarts(data: Record<string, number>) {
 }
 
 /**
- * Bootstrap: pull orders from cloud on load + subscribe to realtime changes.
- * Merges remote state into the local cache and dispatches update events.
+ * Pull the authoritative table state from the cloud.
+ *
+ * The cloud is the source of truth so a table settled on one device never
+ * keeps showing as "open" on another. The only local rows we keep are the
+ * ones that still have un-synced writes queued for this device.
+ */
+export async function refreshFromCloud() {
+  if (typeof window === "undefined") return;
+  const sb = supabase as unknown as {
+    from: (t: string) => { select: (c: string) => Promise<{ data: unknown[] | null; error: unknown }> };
+  };
+  const { data, error } = await sb.from("table_orders").select("table_id, table_label, lines, started_at");
+  if (error || !data) return;
+
+  const remote: TableOrders = {};
+  const remoteStarts: Record<string, number> = {};
+  for (const r of data as Array<{ table_id: string; lines: OrderLine[]; started_at: string }>) {
+    if (r.lines && r.lines.length > 0) {
+      remote[r.table_id] = r.lines;
+      remoteStarts[r.table_id] = new Date(r.started_at).getTime();
+    }
+  }
+
+  // Keep local rows only where a write for that table is still pending.
+  const pending = pendingKeys("table_orders", "table_id");
+  const local = read();
+  const localStarts = readStarts();
+  for (const id of pending) {
+    if (local[id]?.length) {
+      remote[id] = local[id];
+      if (localStarts[id]) remoteStarts[id] = localStarts[id];
+    } else {
+      delete remote[id];
+      delete remoteStarts[id];
+    }
+  }
+
+  write(remote);
+  writeStarts(remoteStarts);
+}
+
+/**
+ * Bootstrap: pull orders from cloud on load + subscribe to realtime changes,
+ * plus re-pull whenever the device comes back / the tab regains focus.
  */
 let bootstrapped = false;
 function bootstrap() {
@@ -86,38 +128,20 @@ function bootstrap() {
   bootstrapped = true;
   startCloudSync();
 
-  const sb = supabase as unknown as {
-    from: (t: string) => { select: (c: string) => Promise<{ data: unknown[] | null; error: unknown }> };
-    channel: (name: string) => {
-      on: (event: string, filter: unknown, cb: (payload: unknown) => void) => {
-        subscribe: () => unknown;
-      };
-    };
-  };
+  void refreshFromCloud();
 
-  // Initial pull (best-effort)
-  sb.from("table_orders")
-    .select("table_id, table_label, lines, started_at")
-    .then(({ data, error }) => {
-      if (error || !data) return;
-      const remote: TableOrders = {};
-      const starts: Record<string, number> = {};
-      for (const r of data as Array<{
-        table_id: string;
-        lines: OrderLine[];
-        started_at: string;
-      }>) {
-        if (r.lines && r.lines.length > 0) {
-          remote[r.table_id] = r.lines;
-          starts[r.table_id] = new Date(r.started_at).getTime();
-        }
-      }
-      // Merge with local: local overwrites when it has entries (in case offline edits pending)
-      const local = read();
-      const merged = { ...remote, ...local };
-      write(merged);
-      writeStarts({ ...starts, ...readStarts() });
-    });
+  const resync = () => {
+    flushNow();
+    void refreshFromCloud();
+  };
+  window.addEventListener("online", resync);
+  window.addEventListener("focus", resync);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") resync();
+  });
+  setInterval(() => {
+    if (navigator.onLine) void refreshFromCloud();
+  }, 20000);
 
   // Realtime subscription
   supabase
