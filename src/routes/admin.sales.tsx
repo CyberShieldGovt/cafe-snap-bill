@@ -239,7 +239,6 @@ function SalesPage() {
               <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— Trends</div>
               <h3 className="text-xl font-black text-foreground">Sales Over Time</h3>
             </div>
-            <PresetPicker value={preset} onChange={setPreset} />
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
