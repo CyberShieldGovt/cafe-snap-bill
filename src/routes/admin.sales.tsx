@@ -191,15 +191,33 @@ function SalesPage() {
       </header>
 
       <main className="mx-auto max-w-[1400px] px-4 py-6 space-y-6">
+        {/* Date range */}
+        <div className="flex flex-wrap items-center gap-3 rounded-3xl border-2 border-border bg-card p-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— Showing</div>
+            <h3 className="text-lg font-black text-foreground leading-tight">{presetLabel}</h3>
+          </div>
+          <div className="ml-auto">
+            <PresetPicker value={preset} onChange={setPreset} />
+          </div>
+          <button
+            onClick={() => setClearing(true)}
+            disabled={inRange.length === 0}
+            className="flex items-center gap-1.5 rounded-full border-2 border-destructive/30 px-3 py-1.5 text-xs font-bold text-destructive transition hover:bg-destructive/10 disabled:opacity-40"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Clear history
+          </button>
+        </div>
+
         {/* Stat cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
-          <Stat label="Today's Sales" value={`₹${todaySales}`} icon={<IndianRupee className="w-4 h-4" />} accent />
-          <Stat label="Orders Today" value={String(ordersToday)} icon={<Receipt className="w-4 h-4" />} />
+          <Stat label={`Sales · ${presetLabel}`} value={`₹${todaySales}`} icon={<IndianRupee className="w-4 h-4" />} accent />
+          <Stat label="Orders" value={String(ordersToday)} icon={<Receipt className="w-4 h-4" />} />
           <Stat label="Average Bill" value={`₹${avgBill}`} icon={<TrendingUp className="w-4 h-4" />} />
           <Stat label="Highest Bill" value={`₹${highest}`} icon={<TrendingUp className="w-4 h-4" />} />
           <Stat label="Lowest Bill" value={`₹${lowest}`} icon={<TrendingUp className="w-4 h-4" />} />
           <Stat label="Pending Tables" value={String(pendingTables)} icon={<Timer className="w-4 h-4" />} />
-          <Stat label="Completed Bills" value={String(completed)} icon={<Receipt className="w-4 h-4" />} />
+          <Stat label="Bills" value={String(completed)} icon={<Receipt className="w-4 h-4" />} />
         </div>
 
         {/* Chart */}
