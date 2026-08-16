@@ -8,7 +8,7 @@ import burgerImg from "@/assets/dish-burger.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BTech Cafe — Chai, Burgers & Rooftop Vibes in Hyderabad" },
+      { title: "BTech Cafe — Chai, Burgers & Rooftop Vibes in Bengaluru" },
       {
         name: "description",
         content:
