@@ -58,6 +58,15 @@ export const Route = createFileRoute("/admin/sales")({
 
 type Preset = "today" | "yesterday" | "7d" | "30d" | "month" | "all";
 
+const PRESET_LABELS: Record<Preset, string> = {
+  today: "Today",
+  yesterday: "Yesterday",
+  "7d": "Last 7 Days",
+  "30d": "Last 30 Days",
+  month: "This Month",
+  all: "All Time",
+};
+
 function rangeFor(preset: Preset): { from: number; to: number } {
   const now = new Date();
   switch (preset) {
