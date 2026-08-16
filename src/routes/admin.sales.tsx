@@ -58,6 +58,15 @@ export const Route = createFileRoute("/admin/sales")({
 
 type Preset = "today" | "yesterday" | "7d" | "30d" | "month" | "all";
 
+const PRESET_LABELS: Record<Preset, string> = {
+  today: "Today",
+  yesterday: "Yesterday",
+  "7d": "Last 7 Days",
+  "30d": "Last 30 Days",
+  month: "This Month",
+  all: "All Time",
+};
+
 function rangeFor(preset: Preset): { from: number; to: number } {
   const now = new Date();
   switch (preset) {
@@ -85,6 +94,9 @@ function SalesPage() {
   const [query, setQuery] = useState("");
   const [viewing, setViewing] = useState<Bill | null>(null);
   const [deleting, setDeleting] = useState<Bill | null>(null);
+  const [clearing, setClearing] = useState(false);
+
+  const presetLabel = PRESET_LABELS[preset];
 
   const { from, to } = rangeFor(preset);
   const inRange = useMemo(
@@ -104,19 +116,17 @@ function SalesPage() {
     );
   }, [inRange, q]);
 
-  const todayRange = rangeFor("today");
-  const today = bills.filter(
-    (b) => b.createdAt >= todayRange.from && b.createdAt <= todayRange.to
-  );
+  // All stats follow the selected date range (Today / Yesterday / 7 Days / …)
+  const today = inRange;
   const todaySales = today.reduce((s, b) => s + b.total, 0);
   const ordersToday = today.length;
   const avgBill = ordersToday ? Math.round(todaySales / ordersToday) : 0;
   const highest = today.reduce((m, b) => Math.max(m, b.total), 0);
   const lowest = ordersToday ? today.reduce((m, b) => Math.min(m, b.total), Infinity) : 0;
   const pendingTables = Object.keys(orders).length;
-  const completed = bills.length;
+  const completed = today.length;
 
-  // Items sold today: sum quantities per item across today's bills
+  // Items sold in the selected range
   const itemsSoldToday = useMemo(() => {
     const map = new Map<string, number>();
     for (const b of today) {
@@ -193,15 +203,33 @@ function SalesPage() {
       </header>
 
       <main className="mx-auto max-w-[1400px] px-4 py-6 space-y-6">
+        {/* Date range */}
+        <div className="flex flex-wrap items-center gap-3 rounded-3xl border-2 border-border bg-card p-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— Showing</div>
+            <h3 className="text-lg font-black text-foreground leading-tight">{presetLabel}</h3>
+          </div>
+          <div className="ml-auto">
+            <PresetPicker value={preset} onChange={setPreset} />
+          </div>
+          <button
+            onClick={() => setClearing(true)}
+            disabled={inRange.length === 0}
+            className="flex items-center gap-1.5 rounded-full border-2 border-destructive/30 px-3 py-1.5 text-xs font-bold text-destructive transition hover:bg-destructive/10 disabled:opacity-40"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Clear history
+          </button>
+        </div>
+
         {/* Stat cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
-          <Stat label="Today's Sales" value={`₹${todaySales}`} icon={<IndianRupee className="w-4 h-4" />} accent />
-          <Stat label="Orders Today" value={String(ordersToday)} icon={<Receipt className="w-4 h-4" />} />
+          <Stat label={`Sales · ${presetLabel}`} value={`₹${todaySales}`} icon={<IndianRupee className="w-4 h-4" />} accent />
+          <Stat label="Orders" value={String(ordersToday)} icon={<Receipt className="w-4 h-4" />} />
           <Stat label="Average Bill" value={`₹${avgBill}`} icon={<TrendingUp className="w-4 h-4" />} />
           <Stat label="Highest Bill" value={`₹${highest}`} icon={<TrendingUp className="w-4 h-4" />} />
           <Stat label="Lowest Bill" value={`₹${lowest}`} icon={<TrendingUp className="w-4 h-4" />} />
           <Stat label="Pending Tables" value={String(pendingTables)} icon={<Timer className="w-4 h-4" />} />
-          <Stat label="Completed Bills" value={String(completed)} icon={<Receipt className="w-4 h-4" />} />
+          <Stat label="Bills" value={String(completed)} icon={<Receipt className="w-4 h-4" />} />
         </div>
 
         {/* Chart */}
@@ -211,7 +239,6 @@ function SalesPage() {
               <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— Trends</div>
               <h3 className="text-xl font-black text-foreground">Sales Over Time</h3>
             </div>
-            <PresetPicker value={preset} onChange={setPreset} />
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -234,12 +261,12 @@ function SalesPage() {
           </div>
         </section>
 
-        {/* Items Sold Today */}
+        {/* Items sold in range */}
         <section className="rounded-3xl border-2 border-border bg-card p-5">
           <div className="flex items-end justify-between mb-4">
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— Today</div>
-              <h3 className="text-xl font-black text-foreground">Items Sold Today</h3>
+              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— {presetLabel}</div>
+              <h3 className="text-xl font-black text-foreground">Items Sold</h3>
             </div>
             <div className="text-xs text-muted-foreground font-semibold">
               {itemsSoldToday.length} unique · {itemsSoldToday.reduce((s, i) => s + i.qty, 0)} total
@@ -247,7 +274,7 @@ function SalesPage() {
           </div>
           {itemsSoldToday.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground rounded-2xl border-2 border-dashed border-border">
-              No items sold yet today.
+              No items sold in this period.
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -434,6 +461,31 @@ function SalesPage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={clearing} onOpenChange={setClearing}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear {inRange.length} bill(s) from {presetLabel}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Every bill in this period will be permanently deleted from history. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const n = inRange.length;
+                inRange.forEach((b) => remove(b.id));
+                setClearing(false);
+                toast.success(`${n} bill(s) cleared`, { description: presetLabel });
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Clear history
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

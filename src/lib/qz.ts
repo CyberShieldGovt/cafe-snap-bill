@@ -245,7 +245,7 @@ export function buildReceiptEscPos(bill: ReceiptData, widthMm: 58 | 80 = 58): nu
   // Footer — smaller font than the bill's item lines (which are tallSize).
   e.smallFont(true);
   for (const l of wrap(
-    "We are renovating the cafe, Hyderabadi special dum Irani Chai will be available from August & Chinese too!",
+    "Nallurahalli, Whitefield, Bengaluru | Open daily 2:00 PM - 1:00 AM",
     width
   )) {
     e.line(l);

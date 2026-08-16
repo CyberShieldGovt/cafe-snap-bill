@@ -8,7 +8,7 @@ import burgerImg from "@/assets/dish-burger.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BTech Cafe — Chai, Burgers & Rooftop Vibes in Hyderabad" },
+      { title: "BTech Cafe — Chai, Burgers & Rooftop Vibes in Bengaluru" },
       {
         name: "description",
         content:
@@ -50,7 +50,7 @@ function Landing() {
             </div>
             <div className="leading-none">
               <p className="text-sm font-black tracking-tight">BTech Cafe</p>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Hyderabad</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Bengaluru</p>
             </div>
           </div>
           <nav className="flex items-center gap-1.5">
@@ -195,8 +195,8 @@ function Landing() {
       <section className="border-t border-border bg-card/40 py-14">
         <div className="mx-auto grid max-w-6xl gap-6 px-4 sm:grid-cols-3">
           {[
-            { icon: MapPin, t: "Find us", d: "BTech Cafe, Hyderabad" },
-            { icon: Clock, t: "Open daily", d: "11:00 AM — 12:00 AM" },
+            { icon: MapPin, t: "Find us", d: "Nallurahalli, Whitefield, Bengaluru" },
+            { icon: Clock, t: "Open daily", d: "2:00 PM — 1:00 AM" },
             { icon: Phone, t: "Call us", d: "Ask any staff member" },
           ].map((c) => (
             <div key={c.t} className="rounded-2xl border border-border bg-background p-5">
@@ -209,7 +209,7 @@ function Landing() {
       </section>
 
       <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-[11px] text-muted-foreground sm:flex-row">
-        <p>© {new Date().getFullYear()} BTech Cafe. Renovating in August — Irani Chai & Chinese coming soon.</p>
+        <p>© {new Date().getFullYear()} BTech Cafe · Nallurahalli, Whitefield, Bengaluru.</p>
         <Link to="/admin" className="font-semibold hover:text-foreground">
           Staff login
         </Link>
