@@ -465,6 +465,31 @@ function SalesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={clearing} onOpenChange={setClearing}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear {inRange.length} bill(s) from {presetLabel}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Every bill in this period will be permanently deleted from history. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const n = inRange.length;
+                inRange.forEach((b) => remove(b.id));
+                setClearing(false);
+                toast.success(`${n} bill(s) cleared`, { description: presetLabel });
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Clear history
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
