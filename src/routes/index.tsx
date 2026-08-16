@@ -195,8 +195,8 @@ function Landing() {
       <section className="border-t border-border bg-card/40 py-14">
         <div className="mx-auto grid max-w-6xl gap-6 px-4 sm:grid-cols-3">
           {[
-            { icon: MapPin, t: "Find us", d: "BTech Cafe, Hyderabad" },
-            { icon: Clock, t: "Open daily", d: "11:00 AM — 12:00 AM" },
+            { icon: MapPin, t: "Find us", d: "Nallurahalli, Whitefield, Bengaluru" },
+            { icon: Clock, t: "Open daily", d: "2:00 PM — 1:00 AM" },
             { icon: Phone, t: "Call us", d: "Ask any staff member" },
           ].map((c) => (
             <div key={c.t} className="rounded-2xl border border-border bg-background p-5">
