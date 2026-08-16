@@ -50,7 +50,7 @@ function Landing() {
             </div>
             <div className="leading-none">
               <p className="text-sm font-black tracking-tight">BTech Cafe</p>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Hyderabad</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Bengaluru</p>
             </div>
           </div>
           <nav className="flex items-center gap-1.5">
