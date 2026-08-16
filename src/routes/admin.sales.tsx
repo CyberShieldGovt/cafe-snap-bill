@@ -261,12 +261,12 @@ function SalesPage() {
           </div>
         </section>
 
-        {/* Items Sold Today */}
+        {/* Items sold in range */}
         <section className="rounded-3xl border-2 border-border bg-card p-5">
           <div className="flex items-end justify-between mb-4">
             <div>
-              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— Today</div>
-              <h3 className="text-xl font-black text-foreground">Items Sold Today</h3>
+              <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— {presetLabel}</div>
+              <h3 className="text-xl font-black text-foreground">Items Sold</h3>
             </div>
             <div className="text-xs text-muted-foreground font-semibold">
               {itemsSoldToday.length} unique · {itemsSoldToday.reduce((s, i) => s + i.qty, 0)} total
