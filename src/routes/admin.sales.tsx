@@ -85,6 +85,9 @@ function SalesPage() {
   const [query, setQuery] = useState("");
   const [viewing, setViewing] = useState<Bill | null>(null);
   const [deleting, setDeleting] = useState<Bill | null>(null);
+  const [clearing, setClearing] = useState(false);
+
+  const presetLabel = PRESET_LABELS[preset];
 
   const { from, to } = rangeFor(preset);
   const inRange = useMemo(
