@@ -84,7 +84,7 @@ function TableOrder() {
   const handleSaveReadd = () => {
     save(lines);
     toast.success(`Table ${id} saved`, { description: `₹${bill} • ${qty} items` });
-    navigate({ to: "/" });
+    navigate({ to: "/admin" });
   };
 
   const handleSavePrint = async (withKot: boolean) => {
@@ -105,7 +105,7 @@ function TableOrder() {
     // Auto settle & clear after printing
     clear();
     setDiscountPct(0);
-    navigate({ to: "/" });
+    navigate({ to: "/admin" });
   };
 
   const handleSettle = () => {
@@ -116,7 +116,7 @@ function TableOrder() {
     setDiscountPct(0);
     setConfirmClear(false);
     toast.success(`Table ${id} settled`, { description: `Bill ₹${bill} closed` });
-    navigate({ to: "/" });
+    navigate({ to: "/admin" });
   };
 
 

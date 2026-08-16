@@ -240,9 +240,8 @@ export function buildReceiptEscPos(bill: ReceiptData, widthMm: 58 | 80 = 58): nu
   e.bold(true);
   e.line("Thank You");
   e.bold(false);
-  e.line("We are renovating");
-  e.line("Introducing Irani Chai &");
-  e.line("Chinese available from August");
+  e.line("Nallurahalli, Whitefield");
+  e.line("Bengaluru");
   e.feed(1);
   e.bold(true);
   e.line("Visit Again");
@@ -400,7 +399,7 @@ export async function printBill(
       const w = window.open("", "_blank");
       if (w) {
         const text =
-          `BTECH CAFE\nNallurahalli, Bengaluru\n` +
+          `BTECH CAFE\nNallurahalli, Whitefield, Bengaluru\n` +
           `Invoice: ${receipt.id}   Table: ${receipt.tableLabel}\n` +
           `${receipt.date} ${receipt.time}\n\n` +
           receipt.lines
