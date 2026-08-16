@@ -104,19 +104,17 @@ function SalesPage() {
     );
   }, [inRange, q]);
 
-  const todayRange = rangeFor("today");
-  const today = bills.filter(
-    (b) => b.createdAt >= todayRange.from && b.createdAt <= todayRange.to
-  );
+  // All stats follow the selected date range (Today / Yesterday / 7 Days / …)
+  const today = inRange;
   const todaySales = today.reduce((s, b) => s + b.total, 0);
   const ordersToday = today.length;
   const avgBill = ordersToday ? Math.round(todaySales / ordersToday) : 0;
   const highest = today.reduce((m, b) => Math.max(m, b.total), 0);
   const lowest = ordersToday ? today.reduce((m, b) => Math.min(m, b.total), Infinity) : 0;
   const pendingTables = Object.keys(orders).length;
-  const completed = bills.length;
+  const completed = today.length;
 
-  // Items sold today: sum quantities per item across today's bills
+  // Items sold in the selected range
   const itemsSoldToday = useMemo(() => {
     const map = new Map<string, number>();
     for (const b of today) {
