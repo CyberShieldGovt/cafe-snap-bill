@@ -209,7 +209,7 @@ function Landing() {
       </section>
 
       <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-[11px] text-muted-foreground sm:flex-row">
-        <p>© {new Date().getFullYear()} BTech Cafe. Renovating in August — Irani Chai & Chinese coming soon.</p>
+        <p>© {new Date().getFullYear()} BTech Cafe · Nallurahalli, Whitefield, Bengaluru.</p>
         <Link to="/admin" className="font-semibold hover:text-foreground">
           Staff login
         </Link>
