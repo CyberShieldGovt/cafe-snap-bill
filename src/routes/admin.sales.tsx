@@ -274,7 +274,7 @@ function SalesPage() {
           </div>
           {itemsSoldToday.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground rounded-2xl border-2 border-dashed border-border">
-              No items sold yet today.
+              No items sold in this period.
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
