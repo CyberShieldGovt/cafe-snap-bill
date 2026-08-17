@@ -82,6 +82,7 @@ function Dashboard() {
             </div>
             <div className="flex items-center gap-1.5 flex-wrap justify-end">
               <SyncPill />
+              <QrOrdersLink />
               <Link to="/admin/expenses" className="flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1.5 text-[11px] font-bold hover:border-primary/40 transition">
                 <Wallet className="w-3 h-3" /> Expenses
               </Link>
@@ -92,6 +93,7 @@ function Dashboard() {
                 <BarChart3 className="w-3 h-3" /> Sales
               </Link>
             </div>
+
           </div>
 
           <div className="flex items-end justify-between gap-4 flex-wrap">
