@@ -13,7 +13,36 @@ import {
   type TableDef,
 } from "@/lib/orders";
 import { SyncPill } from "@/components/sync-pill";
-import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package, Clock, Wallet } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchOrders } from "@/lib/pos.functions";
+import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package, Clock, Wallet, QrCode } from "lucide-react";
+
+function QrOrdersLink() {
+  const { data } = useQuery({
+    queryKey: ["admin-active-orders"],
+    queryFn: () => fetchOrders({ data: { activeOnly: true } }),
+    refetchInterval: 8000,
+  });
+  const pending = ((data ?? []) as { status: string; order_type: string }[]).filter(
+    (o) => o.status === "PENDING_APPROVAL" && o.order_type === "CUSTOMER_QR"
+  ).length;
+
+  return (
+    <Link
+      to="/admin/orders"
+      className="relative flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1.5 text-[11px] font-bold hover:border-primary/40 transition"
+    >
+      <QrCode className="w-3 h-3" /> QR Orders
+      {pending > 0 && (
+        <span className="ml-0.5 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-black text-primary-foreground animate-pulse-ring">
+          {pending}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+
 
 function formatElapsed(startMs: number, nowMs: number): string {
   const diffSec = Math.max(0, Math.floor((nowMs - startMs) / 1000));
