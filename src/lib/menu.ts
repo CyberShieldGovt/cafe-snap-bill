@@ -189,6 +189,8 @@ export const MENU: MenuCategory[] = [
     items: [
       { name: "Mint Lime Juice", price: 49 },
       { name: "Lime Juice", price: 49 },
+      { name: "Soda Nannari", price: 49 },
+      { name: "Milk Nannari", price: 59 },
       { name: "Lime Soda", price: 59 },
       { name: "Moosmabi Juice", price: 59 },
       { name: "WaterMelon Juice", price: 69 },
@@ -202,6 +204,21 @@ export const MENU: MenuCategory[] = [
       { name: "Black Current Mojito", price: 99 },
       { name: "Blue Berry Mojito", price: 99 },
       { name: "Can Berry Mojito", price: 109 },
+    ],
+  },
+  {
+    id: "combos",
+    name: "Combos",
+    emoji: "🎁",
+    items: [
+      { name: "Bun Maska + Chai", price: 59 },
+      { name: "Bun Maska + 2 Chai", price: 79 },
+      { name: "Salted Fries + Veg Nuggets", price: 179 },
+      { name: "Salted Fries + Chicken Popcorn", price: 189 },
+      { name: "Veg Burger + Fries", price: 169 },
+      { name: "Chicken Burger + Salted Fries", price: 189 },
+      { name: "Crispy Fried Chicken + Salted Fries", price: 199 },
+      { name: "Veg Fried Rice + Gobi Manchurian", price: 159 },
     ],
   },
   {
