@@ -27,11 +27,31 @@
     0% { transform: translateY(12px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
   }
+  @keyframes marquee-x {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes spin-slow {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes tilt-in {
+    0% { opacity: 0; transform: perspective(1200px) rotateX(14deg) translateY(40px) scale(0.96); }
+    100% { opacity: 1; transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1); }
+  }
+  @keyframes glow-pan {
+    0%, 100% { transform: translate3d(-8%, -4%, 0) scale(1); }
+    50% { transform: translate3d(8%, 6%, 0) scale(1.15); }
+  }
   .animate-float-slow { animation: float-slow 7s ease-in-out infinite; }
   .animate-float-slower { animation: float-slower 9s ease-in-out infinite; }
   .animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite; }
   .animate-slide-up { animation: slide-up-fade 0.4s ease-out both; }
   .animate-steam { animation: steam 2.5s ease-out infinite; }
+  .animate-marquee { animation: marquee-x 28s linear infinite; }
+  .animate-spin-slow { animation: spin-slow 26s linear infinite; }
+  .animate-tilt-in { animation: tilt-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .animate-glow-pan { animation: glow-pan 14s ease-in-out infinite; }
+
   .shimmer-text {
     background: linear-gradient(90deg, var(--primary) 0%, oklch(0.82 0.17 65) 50%, var(--primary) 100%);
     background-size: 200% 100%;
