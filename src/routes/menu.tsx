@@ -1,8 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { customerMenu } from "@/lib/customer.functions";
 import { Coffee, ArrowLeft, Leaf, QrCode, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+
+const customerMenuQuery = queryOptions({
+  queryKey: ["customer-menu"],
+  queryFn: () => customerMenu(),
+  staleTime: 60_000,
+});
 
 export const Route = createFileRoute("/menu")({
   head: () => ({
@@ -18,6 +24,10 @@ export const Route = createFileRoute("/menu")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(customerMenuQuery),
+  pendingComponent: () => <MenuLoading />,
+  errorComponent: ({ error }) => <MenuError message={error.message} />,
+  notFoundComponent: () => <MenuError message="The menu could not be found." />,
   component: MenuPage,
 });
 
@@ -36,8 +46,8 @@ type Cat = {
 };
 
 function MenuPage() {
-  const { data, isLoading } = useQuery({ queryKey: ["customer-menu"], queryFn: () => customerMenu() });
-  const cats = (data ?? []) as Cat[];
+  const { data } = useSuspenseQuery(customerMenuQuery);
+  const cats = data as Cat[];
   const [page, setPage] = useState(0);
   const pagerRef = useRef<HTMLDivElement | null>(null);
   const tabsRef = useRef<HTMLDivElement | null>(null);
@@ -93,8 +103,6 @@ function MenuPage() {
           </div>
         )}
       </header>
-
-      {isLoading && <p className="py-16 text-center text-sm text-muted-foreground">Loading the menu…</p>}
 
       <div className="relative min-h-0 flex-1">
         <div
@@ -169,6 +177,37 @@ function MenuPage() {
             </div>
           </>
         )}
+      </div>
+    </div>
+  );
+}
+
+function MenuLoading() {
+  return (
+    <div className="grid min-h-screen place-items-center bg-background text-foreground">
+      <div className="text-center">
+        <Coffee className="mx-auto size-7 animate-pulse text-primary" />
+        <p className="mt-3 text-sm font-bold">Preparing the menu…</p>
+      </div>
+    </div>
+  );
+}
+
+function MenuError({ message }: { message: string }) {
+  const router = useRouter();
+  return (
+    <div className="grid min-h-screen place-items-center bg-background px-5 text-foreground">
+      <div className="max-w-sm text-center">
+        <Coffee className="mx-auto size-8 text-primary" />
+        <h1 className="mt-4 text-xl font-black">The menu took too long to load</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+        <button
+          type="button"
+          onClick={() => router.invalidate()}
+          className="mt-5 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+        >
+          Try again
+        </button>
       </div>
     </div>
   );

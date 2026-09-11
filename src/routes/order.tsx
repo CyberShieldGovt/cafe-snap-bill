@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate, Link, useRouter } from "@tanstack/react-router";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { customerMenu, resolveQr, startSession, submitCustomerOrder } from "@/lib/customer.functions";
 import {
@@ -17,6 +17,12 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+const customerMenuQuery = queryOptions({
+  queryKey: ["customer-menu"],
+  queryFn: () => customerMenu(),
+  staleTime: 60_000,
+});
+
 export const Route = createFileRoute("/order")({
   validateSearch: (s: Record<string, unknown>) => ({ qr: typeof s.qr === "string" ? s.qr : undefined }),
   head: () => ({
@@ -29,6 +35,10 @@ export const Route = createFileRoute("/order")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(customerMenuQuery),
+  pendingComponent: () => <OrderLoading />,
+  errorComponent: ({ error }) => <OrderError message={error.message} />,
+  notFoundComponent: () => <OrderError message="The ordering page could not be found." />,
   component: OrderPage,
 });
 
@@ -84,8 +94,8 @@ function OrderPage() {
     queryFn: () => resolveQr({ data: { qr: qr! } }),
     enabled: Boolean(qr),
   });
-  const menu = useQuery({ queryKey: ["customer-menu"], queryFn: () => customerMenu() });
-  const cats = (menu.data ?? []) as Cat[];
+  const { data: menuData } = useSuspenseQuery(customerMenuQuery);
+  const cats = menuData as Cat[];
 
   const allItems = useMemo(() => cats.flatMap((c) => c.items), [cats]);
   const searching = q.trim().length > 0;
@@ -220,8 +230,6 @@ function OrderPage() {
           </div>
         )}
       </header>
-
-      {menu.isLoading && <p className="py-16 text-center text-sm text-muted-foreground">Loading the menu…</p>}
 
       {searching ? (
         <main className="scrollbar-none mx-auto w-full max-w-5xl flex-1 overflow-y-auto px-4 py-4">
@@ -394,6 +402,37 @@ function OrderPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function OrderLoading() {
+  return (
+    <div className="grid min-h-screen place-items-center bg-background text-foreground">
+      <div className="text-center">
+        <Coffee className="mx-auto size-7 animate-pulse text-primary" />
+        <p className="mt-3 text-sm font-bold">Preparing your ordering menu…</p>
+      </div>
+    </div>
+  );
+}
+
+function OrderError({ message }: { message: string }) {
+  const router = useRouter();
+  return (
+    <div className="grid min-h-screen place-items-center bg-background px-5 text-foreground">
+      <div className="max-w-sm text-center">
+        <Coffee className="mx-auto size-8 text-primary" />
+        <h1 className="mt-4 text-xl font-black">Ordering is temporarily unavailable</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+        <button
+          type="button"
+          onClick={() => router.invalidate()}
+          className="mt-5 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+        >
+          Try again
+        </button>
+      </div>
     </div>
   );
 }
