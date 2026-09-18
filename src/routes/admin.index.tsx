@@ -15,7 +15,7 @@ import {
 import { SyncPill } from "@/components/sync-pill";
 import { useQuery } from "@tanstack/react-query";
 import { fetchOrders } from "@/lib/pos.functions";
-import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package, Clock, Wallet, QrCode } from "lucide-react";
+import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package, Clock, Wallet, QrCode, ClipboardList } from "lucide-react";
 
 function QrOrdersLink() {
   const { data } = useQuery({
@@ -114,6 +114,9 @@ function Dashboard() {
               <QrOrdersLink />
               <Link to="/admin/expenses" className="flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1.5 text-[11px] font-bold hover:border-primary/40 transition">
                 <Wallet className="w-3 h-3" /> Expenses
+              </Link>
+              <Link to="/admin/daily-inventory" className="flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1.5 text-[11px] font-bold hover:border-primary/40 transition">
+                <ClipboardList className="w-3 h-3" /> Daily Inventory
               </Link>
               <Link to="/admin/inventory" className="flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1.5 text-[11px] font-bold hover:border-primary/40 transition">
                 <Package className="w-3 h-3" /> Inventory

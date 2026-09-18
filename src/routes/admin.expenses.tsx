@@ -134,7 +134,7 @@ function ExpensesPage() {
                 <>
                   <Field label="Chef">
                     <div className="flex gap-2">
-                      {(["Hussain", "Raju"] as ChefName[]).map((n) => (
+                      {(["Hussain", "Bhargav"] as ChefName[]).map((n) => (
                         <button
                           key={n}
                           onClick={() => setChef(n)}
