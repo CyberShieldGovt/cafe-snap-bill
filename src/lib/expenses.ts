@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type ExpenseCategory = "chef" | "grocery" | "vegetables" | "chicken" | "milk";
-export type ChefName = "Hussain" | "Raju";
+export type ChefName = "Hussain" | "Bhargav";
 export type PayType = "daily" | "monthly";
 
 export type Expense = {

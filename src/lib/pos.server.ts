@@ -1,4 +1,5 @@
 // Server-only order engine. All table / token / QR orders flow through here.
+import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 type Loose = {
@@ -6,6 +7,27 @@ type Loose = {
   rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: any; error: any }>;
 };
 const db = () => supabaseAdmin as unknown as Loose;
+
+let _pub: any;
+/** Publishable (anon) client for public reads — menu, locations, tracking. */
+const pub = (): Loose => {
+  if (!_pub) {
+    const url = process.env["SUPABASE_URL"]!;
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    _pub = createClient(url, key, {
+      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+      global: {
+        fetch: (input: any, init: any) => {
+          const h = new Headers(init?.headers);
+          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+          h.set("apikey", key);
+          return fetch(input, { ...init, headers: h });
+        },
+      },
+    });
+  }
+  return _pub as Loose;
+};
 
 function unwrap(res: { data: any; error: any }): any {
   if (res.error) throw new Error(res.error.message ?? String(res.error));
@@ -60,7 +82,7 @@ export async function recordPayment(orderId: string, mode: string, amount?: numb
 
 export async function listLocations() {
   return unwrap(
-    await db()
+    await pub()
       .from("locations")
       .select("id, location_type, table_number, label, short, qr_id, status, active_order_id, sort_order")
       .eq("is_active", true)
@@ -117,9 +139,9 @@ export async function markKotPrinted(kotId: string) {
 
 export async function listMenu(forCustomer: boolean) {
   const cats = unwrap(
-    await db().from("menu_categories").select("id, name, emoji, sort_order").order("sort_order")
+    await pub().from("menu_categories").select("id, name, emoji, sort_order").order("sort_order")
   ) as { id: string; name: string; emoji: string; sort_order: number }[];
-  let iq = db()
+  let iq = pub()
     .from("menu_items")
     .select("id, category_id, name, price, sort_order, is_active, is_available, is_veg, description, image_url, visibility, kot_section, prep_time_min")
     .eq("is_active", true)
@@ -144,17 +166,17 @@ export async function deleteMenuItem(id: string) {
 }
 
 export async function listKotSections() {
-  return unwrap(await db().from("kot_sections").select("id, name, sort_order").order("sort_order"));
+  return unwrap(await pub().from("kot_sections").select("id, name, sort_order").order("sort_order"));
 }
 
 // ---------- Customer-facing ----------
 
 export async function locationByQr(qrId: string) {
-  return unwrap(await db().rpc("get_location_by_qr", { p_qr: qrId }));
+  return unwrap(await pub().rpc("get_location_by_qr", { p_qr: qrId }));
 }
 
 export async function orderByTracking(token: string) {
-  return unwrap(await db().rpc("get_order_by_tracking", { p_token: token }));
+  return unwrap(await pub().rpc("get_order_by_tracking", { p_token: token }));
 }
 
 export async function createSession(input: {

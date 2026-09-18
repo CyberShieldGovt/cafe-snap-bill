@@ -88,6 +88,36 @@ export type Database = {
           },
         ]
       }
+      daily_inventory_logs: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          note: string | null
+          shift_type: string
+          staff_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items?: Json
+          note?: string | null
+          shift_type: string
+          staff_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          note?: string | null
+          shift_type?: string
+          staff_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number

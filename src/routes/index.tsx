@@ -248,16 +248,30 @@ function Landing() {
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-20 md:grid-cols-[1.1fr_0.9fr] md:py-28">
           <div className="preserve-3d" style={{ transform: `translate3d(0, ${-y * 0.06}px, 0)` }}>
-            <span className="animate-slide-up inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary backdrop-blur">
-              <Star className="size-3 fill-primary" /> Chai · Maska · Grills · Rooftop
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="animate-slide-up inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary backdrop-blur">
+                <Star className="size-3 fill-primary" /> Chai · Maska · Grills · Rooftop
+              </span>
+              <span className="animate-slide-up inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/70 px-3 py-1 text-[11px] font-bold backdrop-blur">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-2 animate-ping rounded-full bg-primary/70" />
+                  <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                </span>
+                Open 1 PM – 1 AM
+              </span>
+            </div>
             <h1 className="animate-tilt-in mt-4 max-w-2xl text-[2.6rem] font-black leading-[1.02] tracking-tight md:text-6xl">
-              Irani chai, hot <span className="shimmer-text">bun maska</span>, and a rooftop that never gets old.
+              Irani chai, hot <span className="shimmer-text">bun maska</span>, and a{" "}
+              <span key={rotating} className="animate-tilt-in inline-block text-primary">
+                {rotating}
+              </span>{" "}
+              that never gets old.
             </h1>
             <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
               Scan the QR on your table, build your order and watch it move from kitchen to table — no waiting for
               someone to take your order.
             </p>
+
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -290,6 +304,23 @@ function Landing() {
                 </div>
               ))}
             </dl>
+          </div>
+
+          {/* mobile image strip */}
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 no-scrollbar md:hidden">
+            {[
+              { src: chaiImg, alt: "Glass of Irani chai" },
+              { src: maskaImg, alt: "Bun maska with butter" },
+              { src: friesImg, alt: "Peri peri fries" },
+            ].map((im, i) => (
+              <div
+                key={im.alt}
+                className="animate-float-slow h-28 w-36 shrink-0 overflow-hidden rounded-2xl border border-border/70 shadow-xl shadow-primary/15"
+                style={{ animationDelay: `${i * 0.4}s` }}
+              >
+                <img src={im.src} alt={im.alt} width={600} height={600} loading="lazy" className="size-full object-cover" />
+              </div>
+            ))}
           </div>
 
           {/* floating 3D image stack */}
