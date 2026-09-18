@@ -1,4 +1,5 @@
 // Server-only order engine. All table / token / QR orders flow through here.
+import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 type Loose = {
@@ -6,6 +7,27 @@ type Loose = {
   rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: any; error: any }>;
 };
 const db = () => supabaseAdmin as unknown as Loose;
+
+let _pub: any;
+/** Publishable (anon) client for public reads — menu, locations, tracking. */
+const pub = (): Loose => {
+  if (!_pub) {
+    const url = process.env["SUPABASE_URL"]!;
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    _pub = createClient(url, key, {
+      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+      global: {
+        fetch: (input: any, init: any) => {
+          const h = new Headers(init?.headers);
+          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+          h.set("apikey", key);
+          return fetch(input, { ...init, headers: h });
+        },
+      },
+    });
+  }
+  return _pub as Loose;
+};
 
 function unwrap(res: { data: any; error: any }): any {
   if (res.error) throw new Error(res.error.message ?? String(res.error));
