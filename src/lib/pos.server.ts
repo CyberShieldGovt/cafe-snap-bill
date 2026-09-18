@@ -82,7 +82,7 @@ export async function recordPayment(orderId: string, mode: string, amount?: numb
 
 export async function listLocations() {
   return unwrap(
-    await db()
+    await pub()
       .from("locations")
       .select("id, location_type, table_number, label, short, qr_id, status, active_order_id, sort_order")
       .eq("is_active", true)
@@ -139,9 +139,9 @@ export async function markKotPrinted(kotId: string) {
 
 export async function listMenu(forCustomer: boolean) {
   const cats = unwrap(
-    await db().from("menu_categories").select("id, name, emoji, sort_order").order("sort_order")
+    await pub().from("menu_categories").select("id, name, emoji, sort_order").order("sort_order")
   ) as { id: string; name: string; emoji: string; sort_order: number }[];
-  let iq = db()
+  let iq = pub()
     .from("menu_items")
     .select("id, category_id, name, price, sort_order, is_active, is_available, is_veg, description, image_url, visibility, kot_section, prep_time_min")
     .eq("is_active", true)
@@ -166,17 +166,17 @@ export async function deleteMenuItem(id: string) {
 }
 
 export async function listKotSections() {
-  return unwrap(await db().from("kot_sections").select("id, name, sort_order").order("sort_order"));
+  return unwrap(await pub().from("kot_sections").select("id, name, sort_order").order("sort_order"));
 }
 
 // ---------- Customer-facing ----------
 
 export async function locationByQr(qrId: string) {
-  return unwrap(await db().rpc("get_location_by_qr", { p_qr: qrId }));
+  return unwrap(await pub().rpc("get_location_by_qr", { p_qr: qrId }));
 }
 
 export async function orderByTracking(token: string) {
-  return unwrap(await db().rpc("get_order_by_tracking", { p_token: token }));
+  return unwrap(await pub().rpc("get_order_by_tracking", { p_token: token }));
 }
 
 export async function createSession(input: {
