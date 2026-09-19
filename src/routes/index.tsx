@@ -92,6 +92,17 @@ function useScrollY() {
   return y;
 }
 
+const ROTATING_WORDS = ["rooftop evening", "midnight maggi", "grill platter", "cutting chai"];
+
+function useRotatingWord(intervalMs = 2600) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setI((v) => (v + 1) % ROTATING_WORDS.length), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return ROTATING_WORDS[i];
+}
+
 /** Pointer-driven 3D tilt wrapper */
 function Tilt({
   children,
@@ -174,6 +185,7 @@ const TICKER = [
 function Landing() {
   const pageRef = useReveal();
   const y = useScrollY();
+  const rotating = useRotatingWord();
 
   return (
     <div ref={pageRef} className="min-h-screen overflow-x-clip bg-background text-foreground">
