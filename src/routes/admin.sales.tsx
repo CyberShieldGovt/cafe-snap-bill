@@ -32,6 +32,7 @@ import {
   X,
 } from "lucide-react";
 import { useBills, type Bill } from "@/lib/bills";
+import { DEMO_SALES, buildDemoBills } from "@/lib/demo-sales";
 import { useAllOrders } from "@/lib/orders";
 import { printBill, getPrinterWidth, setPrinterWidth, type PrinterWidth } from "@/lib/print";
 
@@ -88,7 +89,12 @@ function rangeFor(preset: Preset): { from: number; to: number } {
 }
 
 function SalesPage() {
-  const { bills, remove } = useBills();
+  const { bills: realBills, remove: removeReal } = useBills();
+  // Demo dataset (see lib/demo-sales.ts). Set DEMO_SALES=false to use real bills.
+  const [demoBills, setDemoBills] = useState<Bill[]>(() => (DEMO_SALES ? buildDemoBills() : []));
+  const bills = DEMO_SALES ? demoBills : realBills;
+  const remove = (id: string) =>
+    DEMO_SALES ? setDemoBills((prev) => prev.filter((b) => b.id !== id)) : removeReal(id);
   const orders = useAllOrders();
   const [preset, setPreset] = useState<Preset>("today");
   const [query, setQuery] = useState("");
@@ -138,6 +144,34 @@ function SalesPage() {
       .map(([name, qty]) => ({ name, qty }))
       .sort((a, b) => b.qty - a.qty);
   }, [today]);
+
+  // Month-wise summary (sales, orders, average per day)
+  const monthly = useMemo(() => {
+    const now = new Date();
+    const map = new Map<string, { key: number; label: string; sales: number; orders: number; days: Set<string> }>();
+    for (const b of bills) {
+      const d = new Date(b.createdAt);
+      const k = d.getFullYear() * 12 + d.getMonth();
+      const m = map.get(String(k)) ?? { key: k, label: format(d, "MMM yyyy"), sales: 0, orders: 0, days: new Set<string>() };
+      m.sales += b.total;
+      m.orders += 1;
+      m.days.add(format(d, "yyyy-MM-dd"));
+      map.set(String(k), m);
+    }
+    return Array.from(map.values())
+      .sort((a, b) => a.key - b.key)
+      .map((m) => {
+        const isCurrent = m.key === now.getFullYear() * 12 + now.getMonth();
+        const dayCount = isCurrent ? now.getDate() : m.days.size;
+        return { ...m, dayCount, avgPerDay: dayCount ? Math.round(m.sales / dayCount) : 0, isCurrent };
+      });
+  }, [bills]);
+
+  const rangeDays = useMemo(() => {
+    const set = new Set(today.map((b) => format(new Date(b.createdAt), "yyyy-MM-dd")));
+    return set.size;
+  }, [today]);
+  const avgPerDay = rangeDays ? Math.round(todaySales / rangeDays) : 0;
 
   const [printerWidth, setPrinterWidthState] = useState<PrinterWidth>(58);
   useEffect(() => {
@@ -222,8 +256,9 @@ function SalesPage() {
         </div>
 
         {/* Stat cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
-          <Stat label={`Sales · ${presetLabel}`} value={`₹${todaySales}`} icon={<IndianRupee className="w-4 h-4" />} accent />
+        <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-4 gap-3">
+          <Stat label={`Sales · ${presetLabel}`} value={`₹${todaySales.toLocaleString("en-IN")}`} icon={<IndianRupee className="w-4 h-4" />} accent />
+          <Stat label="Avg Sales / Day" value={`₹${avgPerDay.toLocaleString("en-IN")}`} icon={<TrendingUp className="w-4 h-4" />} />
           <Stat label="Orders" value={String(ordersToday)} icon={<Receipt className="w-4 h-4" />} />
           <Stat label="Average Bill" value={`₹${avgBill}`} icon={<TrendingUp className="w-4 h-4" />} />
           <Stat label="Highest Bill" value={`₹${highest}`} icon={<TrendingUp className="w-4 h-4" />} />
@@ -231,6 +266,59 @@ function SalesPage() {
           <Stat label="Pending Tables" value={String(pendingTables)} icon={<Timer className="w-4 h-4" />} />
           <Stat label="Bills" value={String(completed)} icon={<Receipt className="w-4 h-4" />} />
         </div>
+
+        {/* Month-wise summary */}
+        <section className="rounded-3xl border-2 border-border bg-card p-5">
+          <div className="mb-4">
+            <div className="text-[10px] uppercase tracking-widest text-primary font-bold">— Monthly</div>
+            <h3 className="text-xl font-black text-foreground">Sales Per Month</h3>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthly.map((m) => ({ month: m.label, sales: m.sales }))} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={11} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={11} tickFormatter={(v: number) => `${(v / 100000).toFixed(1)}L`} />
+                  <Tooltip
+                    contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12 }}
+                    formatter={(v: number) => [`₹${v.toLocaleString("en-IN")}`, "Sales"]}
+                  />
+                  <Bar dataKey="sales" fill="var(--primary)" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="overflow-auto rounded-2xl border border-border">
+              <table className="w-full text-sm">
+                <thead className="bg-secondary/60 text-foreground">
+                  <tr className="text-left">
+                    <Th>Month</Th>
+                    <Th>Sales</Th>
+                    <Th>Orders</Th>
+                    <Th>Avg / Day</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...monthly].reverse().map((m) => (
+                    <tr key={m.key} className="border-t border-border">
+                      <Td className="font-bold">
+                        {m.label}
+                        {m.isCurrent && (
+                          <span className="ml-2 text-[9px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                            Running
+                          </span>
+                        )}
+                      </Td>
+                      <Td className="font-bold text-primary">₹{m.sales.toLocaleString("en-IN")}</Td>
+                      <Td>{m.orders}</Td>
+                      <Td>₹{m.avgPerDay.toLocaleString("en-IN")}</Td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
         {/* Chart */}
         <section className="rounded-3xl border-2 border-border bg-card p-5">
