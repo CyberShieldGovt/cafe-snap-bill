@@ -15,7 +15,7 @@ import {
 import { SyncPill } from "@/components/sync-pill";
 import { useQuery } from "@tanstack/react-query";
 import { fetchOrders } from "@/lib/pos.functions";
-import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package, Clock, Wallet, QrCode, ClipboardList } from "lucide-react";
+import { Coffee, Utensils, TrendingUp, Circle, BarChart3, Package, Clock, Wallet, QrCode, ClipboardList, Target } from "lucide-react";
 
 function QrOrdersLink() {
   const { data } = useQuery({
