@@ -9,40 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SalesRouteImport } from './routes/sales'
-import { Route as OrderRouteImport } from './routes/order'
-import { Route as MenuRouteImport } from './routes/menu'
-import { Route as InventoryRouteImport } from './routes/inventory'
-import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ExpensesRouteImport } from './routes/expenses'
+import { Route as InventoryRouteImport } from './routes/inventory'
+import { Route as MenuRouteImport } from './routes/menu'
+import { Route as OrderRouteImport } from './routes/order'
+import { Route as SalesRouteImport } from './routes/sales'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as TableIdRouteImport } from './routes/table.$id'
-import { Route as OrderStatusTokenRouteImport } from './routes/order-status.$token'
-import { Route as AdminSalesRouteImport } from './routes/admin.sales'
-import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
-import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
-import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminDailyInventoryRouteImport } from './routes/admin.daily-inventory'
+import { Route as AdminExpectedSalesRouteImport } from './routes/admin.expected-sales'
+import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
+import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminSalesRouteImport } from './routes/admin.sales'
+import { Route as OrderStatusTokenRouteImport } from './routes/order-status.$token'
+import { Route as TableIdRouteImport } from './routes/table.$id'
 import { Route as AdminTableIdRouteImport } from './routes/admin.table.$id'
 
-const SalesRoute = SalesRouteImport.update({
-  id: '/sales',
-  path: '/sales',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OrderRoute = OrderRouteImport.update({
-  id: '/order',
-  path: '/order',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MenuRoute = MenuRouteImport.update({
-  id: '/menu',
-  path: '/menu',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InventoryRoute = InventoryRouteImport.update({
-  id: '/inventory',
-  path: '/inventory',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExpensesRoute = ExpensesRouteImport.update({
@@ -50,9 +36,24 @@ const ExpensesRoute = ExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const InventoryRoute = InventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MenuRoute = MenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrderRoute = OrderRouteImport.update({
+  id: '/order',
+  path: '/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalesRoute = SalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -60,29 +61,14 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TableIdRoute = TableIdRouteImport.update({
-  id: '/table/$id',
-  path: '/table/$id',
+const AdminDailyInventoryRoute = AdminDailyInventoryRouteImport.update({
+  id: '/admin/daily-inventory',
+  path: '/admin/daily-inventory',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrderStatusTokenRoute = OrderStatusTokenRouteImport.update({
-  id: '/order-status/$token',
-  path: '/order-status/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSalesRoute = AdminSalesRouteImport.update({
-  id: '/admin/sales',
-  path: '/admin/sales',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminOrdersRoute = AdminOrdersRouteImport.update({
-  id: '/admin/orders',
-  path: '/admin/orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminInventoryRoute = AdminInventoryRouteImport.update({
-  id: '/admin/inventory',
-  path: '/admin/inventory',
+const AdminExpectedSalesRoute = AdminExpectedSalesRouteImport.update({
+  id: '/admin/expected-sales',
+  path: '/admin/expected-sales',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminExpensesRoute = AdminExpensesRouteImport.update({
@@ -90,9 +76,29 @@ const AdminExpensesRoute = AdminExpensesRouteImport.update({
   path: '/admin/expenses',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminDailyInventoryRoute = AdminDailyInventoryRouteImport.update({
-  id: '/admin/daily-inventory',
-  path: '/admin/daily-inventory',
+const AdminInventoryRoute = AdminInventoryRouteImport.update({
+  id: '/admin/inventory',
+  path: '/admin/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSalesRoute = AdminSalesRouteImport.update({
+  id: '/admin/sales',
+  path: '/admin/sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrderStatusTokenRoute = OrderStatusTokenRouteImport.update({
+  id: '/order-status/$token',
+  path: '/order-status/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TableIdRoute = TableIdRouteImport.update({
+  id: '/table/$id',
+  path: '/table/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTableIdRoute = AdminTableIdRouteImport.update({
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/order': typeof OrderRoute
   '/sales': typeof SalesRoute
   '/admin/daily-inventory': typeof AdminDailyInventoryRoute
+  '/admin/expected-sales': typeof AdminExpectedSalesRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/order': typeof OrderRoute
   '/sales': typeof SalesRoute
   '/admin/daily-inventory': typeof AdminDailyInventoryRoute
+  '/admin/expected-sales': typeof AdminExpectedSalesRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/order': typeof OrderRoute
   '/sales': typeof SalesRoute
   '/admin/daily-inventory': typeof AdminDailyInventoryRoute
+  '/admin/expected-sales': typeof AdminExpectedSalesRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/order'
     | '/sales'
     | '/admin/daily-inventory'
+    | '/admin/expected-sales'
     | '/admin/expenses'
     | '/admin/inventory'
     | '/admin/orders'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/order'
     | '/sales'
     | '/admin/daily-inventory'
+    | '/admin/expected-sales'
     | '/admin/expenses'
     | '/admin/inventory'
     | '/admin/orders'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/order'
     | '/sales'
     | '/admin/daily-inventory'
+    | '/admin/expected-sales'
     | '/admin/expenses'
     | '/admin/inventory'
     | '/admin/orders'
@@ -215,6 +227,7 @@ export interface RootRouteChildren {
   OrderRoute: typeof OrderRoute
   SalesRoute: typeof SalesRoute
   AdminDailyInventoryRoute: typeof AdminDailyInventoryRoute
+  AdminExpectedSalesRoute: typeof AdminExpectedSalesRoute
   AdminExpensesRoute: typeof AdminExpensesRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
@@ -227,32 +240,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sales': {
-      id: '/sales'
-      path: '/sales'
-      fullPath: '/sales'
-      preLoaderRoute: typeof SalesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/order': {
-      id: '/order'
-      path: '/order'
-      fullPath: '/order'
-      preLoaderRoute: typeof OrderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/menu': {
-      id: '/menu'
-      path: '/menu'
-      fullPath: '/menu'
-      preLoaderRoute: typeof MenuRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/inventory': {
-      id: '/inventory'
-      path: '/inventory'
-      fullPath: '/inventory'
-      preLoaderRoute: typeof InventoryRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/expenses': {
@@ -262,11 +254,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExpensesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/inventory': {
+      id: '/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
+      preLoaderRoute: typeof InventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/menu': {
+      id: '/menu'
+      path: '/menu'
+      fullPath: '/menu'
+      preLoaderRoute: typeof MenuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/order': {
+      id: '/order'
+      path: '/order'
+      fullPath: '/order'
+      preLoaderRoute: typeof OrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sales': {
+      id: '/sales'
+      path: '/sales'
+      fullPath: '/sales'
+      preLoaderRoute: typeof SalesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -276,39 +289,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/table/$id': {
-      id: '/table/$id'
-      path: '/table/$id'
-      fullPath: '/table/$id'
-      preLoaderRoute: typeof TableIdRouteImport
+    '/admin/daily-inventory': {
+      id: '/admin/daily-inventory'
+      path: '/admin/daily-inventory'
+      fullPath: '/admin/daily-inventory'
+      preLoaderRoute: typeof AdminDailyInventoryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/order-status/$token': {
-      id: '/order-status/$token'
-      path: '/order-status/$token'
-      fullPath: '/order-status/$token'
-      preLoaderRoute: typeof OrderStatusTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/sales': {
-      id: '/admin/sales'
-      path: '/admin/sales'
-      fullPath: '/admin/sales'
-      preLoaderRoute: typeof AdminSalesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/orders': {
-      id: '/admin/orders'
-      path: '/admin/orders'
-      fullPath: '/admin/orders'
-      preLoaderRoute: typeof AdminOrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/inventory': {
-      id: '/admin/inventory'
-      path: '/admin/inventory'
-      fullPath: '/admin/inventory'
-      preLoaderRoute: typeof AdminInventoryRouteImport
+    '/admin/expected-sales': {
+      id: '/admin/expected-sales'
+      path: '/admin/expected-sales'
+      fullPath: '/admin/expected-sales'
+      preLoaderRoute: typeof AdminExpectedSalesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/expenses': {
@@ -318,11 +310,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminExpensesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/daily-inventory': {
-      id: '/admin/daily-inventory'
-      path: '/admin/daily-inventory'
-      fullPath: '/admin/daily-inventory'
-      preLoaderRoute: typeof AdminDailyInventoryRouteImport
+    '/admin/inventory': {
+      id: '/admin/inventory'
+      path: '/admin/inventory'
+      fullPath: '/admin/inventory'
+      preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/sales': {
+      id: '/admin/sales'
+      path: '/admin/sales'
+      fullPath: '/admin/sales'
+      preLoaderRoute: typeof AdminSalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/order-status/$token': {
+      id: '/order-status/$token'
+      path: '/order-status/$token'
+      fullPath: '/order-status/$token'
+      preLoaderRoute: typeof OrderStatusTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/table/$id': {
+      id: '/table/$id'
+      path: '/table/$id'
+      fullPath: '/table/$id'
+      preLoaderRoute: typeof TableIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/table/$id': {
@@ -343,6 +363,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrderRoute: OrderRoute,
   SalesRoute: SalesRoute,
   AdminDailyInventoryRoute: AdminDailyInventoryRoute,
+  AdminExpectedSalesRoute: AdminExpectedSalesRoute,
   AdminExpensesRoute: AdminExpensesRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminOrdersRoute: AdminOrdersRoute,

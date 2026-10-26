@@ -37,7 +37,9 @@ export const Route = createFileRoute("/order")({
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(customerMenuQuery),
   pendingComponent: () => <OrderLoading />,
-  errorComponent: ({ error }) => <OrderError message={error.message} />,
+  errorComponent: ({ error }) => (
+    <OrderError message={error instanceof Error ? error.message : "The ordering page could not be loaded."} />
+  ),
   notFoundComponent: () => <OrderError message="The ordering page could not be found." />,
   component: OrderPage,
 });

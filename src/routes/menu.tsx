@@ -26,7 +26,9 @@ export const Route = createFileRoute("/menu")({
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(customerMenuQuery),
   pendingComponent: () => <MenuLoading />,
-  errorComponent: ({ error }) => <MenuError message={error.message} />,
+  errorComponent: ({ error }) => (
+    <MenuError message={error instanceof Error ? error.message : "The menu could not be loaded."} />
+  ),
   notFoundComponent: () => <MenuError message="The menu could not be found." />,
   component: MenuPage,
 });
