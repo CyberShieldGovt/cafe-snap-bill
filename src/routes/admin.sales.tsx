@@ -32,7 +32,7 @@ import {
   X,
 } from "lucide-react";
 import { useBills, type Bill } from "@/lib/bills";
-import { DEMO_SALES, buildDemoBills } from "@/lib/demo-sales";
+import { DEMO_SALES, buildDemoBills } from "@/lib/sale";
 import { useAllOrders } from "@/lib/orders";
 import { printBill, getPrinterWidth, setPrinterWidth, type PrinterWidth } from "@/lib/print";
 
