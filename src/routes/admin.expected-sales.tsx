@@ -217,8 +217,8 @@ function ExpectedSalesPage() {
             </table>
           </div>
           <p className="mt-3 text-[11px] font-semibold text-muted-foreground">
-            Plan figures from the start of the month — daily values sit in the ₹7,000–₹11,500 band with the month
-            tracking ₹1.8L till date against the ₹3.5–4L monthly target.
+            Plan figures from the start date of this month — daily values sit in the ₹7,000–₹11,000 band with the
+            month tracking ₹1.8L till date against the ₹3.5–4L monthly target.
           </p>
         </section>
       </main>

@@ -2,8 +2,9 @@
  * Expected Sales (plan) figures.
  *
  * Deterministic per month: the same month always produces the same numbers.
- * Month-till-date is pinned to ₹1,80,000, daily values sit in the ₹7,000–₹11,500
- * band, daily target is ₹10,000–₹11,000 and the monthly target is ₹3.5–4L.
+ * Month-till-date is pinned to ₹1,80,000, daily values sit in the ₹7,000–₹11,000
+ * band from the 6th of the month, daily target is ₹10,000–₹11,000 and the
+ * monthly target is ₹3.5–4L.
  */
 
 export type ExpectedItem = { name: string; qty: number; amount: number };
@@ -99,17 +100,20 @@ export function buildExpectedSummary(now = new Date()): ExpectedSummary {
   const y = now.getFullYear();
   const m = now.getMonth();
   const rand = mulberry32(y * 100 + m + 7);
-  const elapsedDays = Math.min(now.getDate(), new Date(y, m + 1, 0).getDate());
   const daysInMonth = new Date(y, m + 1, 0).getDate();
+  // Plan runs from the 6th of the month so daily values can sit in the
+  // ₹7,000–₹11,000 band while the month-till-date total stays ₹1,80,000.
+  const startDay = Math.min(6, daysInMonth);
+  const elapsedDays = Math.max(1, Math.min(now.getDate() - startDay + 1, daysInMonth - startDay + 1));
 
-  // Raw per-day values inside the ₹7,000–₹11,500 band, scaled so the
+  // Raw per-day values inside the ₹7,000–₹11,000 band, scaled so the
   // month-till-date total lands exactly on ₹1,80,000.
   const raw: number[] = [];
-  for (let i = 0; i < elapsedDays; i++) raw.push(7_000 + rand() * 4_500);
+  for (let i = 0; i < elapsedDays; i++) raw.push(7_000 + rand() * 4_000);
   const scale = MTD_SALES / raw.reduce((s, v) => s + v, 0);
 
   const days: ExpectedDay[] = raw.map((v, i) => {
-    const date = new Date(y, m, i + 1);
+    const date = new Date(y, m, startDay + i);
     const sales = Math.round((v * scale) / 100) * 100;
     const avgBill = 160 + Math.round(rand() * 60);
     const orders = Math.max(3, Math.round(sales / avgBill));
