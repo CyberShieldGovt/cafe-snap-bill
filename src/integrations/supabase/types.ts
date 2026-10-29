@@ -631,6 +631,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_report_bills: {
+        Row: {
+          created_at: string
+          id: string
+          item_count: number
+          lines: Json
+          status: string
+          table_id: string
+          table_label: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          item_count?: number
+          lines?: Json
+          status?: string
+          table_id: string
+          table_label: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_count?: number
+          lines?: Json
+          status?: string
+          table_id?: string
+          table_label?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           key: string
@@ -675,7 +711,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      sales_report_items: {
+        Row: {
+          amount: number | null
+          bill_id: string | null
+          created_at: string | null
+          item_name: string | null
+          qty: number | null
+          table_label: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_order_items: {
