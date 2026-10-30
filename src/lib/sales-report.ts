@@ -36,7 +36,7 @@ function write(data: Bill[]) {
   window.dispatchEvent(new Event(EVT));
 }
 
-function rowToBill(r: {
+export type ReportRow = {
   id: string;
   table_id: string;
   table_label: string;
@@ -45,7 +45,9 @@ function rowToBill(r: {
   item_count: number;
   status: string;
   created_at: string;
-}): Bill {
+};
+
+function rowToBill(r: ReportRow): Bill {
   const ts = new Date(r.created_at).getTime();
   return {
     id: r.id,
