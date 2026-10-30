@@ -32,10 +32,17 @@ function rng(seed: number) {
 const UNIQUE = Array.from(new Map(ALL_ITEMS.map((i) => [i.name, i])).values()).filter(
   (i) => i.price > 0 && i.price <= 260 && !/parcel/i.test(i.name)
 );
-const WEIGHTED = UNIQUE.flatMap((i) => {
+const baseWeights = UNIQUE.flatMap((i) => {
   const w = i.price <= 30 ? 8 : i.price <= 60 ? 6 : i.price <= 110 ? 4 : i.price <= 160 ? 2 : 1;
   return Array(w).fill(i);
 });
+// Major sellers — Irani chai and bun maska dominate the counter, so they get
+// the heaviest weights and lead the Items Sold summary.
+const MAJOR_NAMES = ["Irani Dum Chai", "Bun Maska"];
+const WEIGHTED = [
+  ...baseWeights,
+  ...UNIQUE.filter((i) => MAJOR_NAMES.includes(i.name)).flatMap((i) => Array(14).fill(i)),
+];
 
 const TABLES = [
   ...Array.from({ length: 10 }, (_, i) => ({ id: `t${i + 1}`, label: `Table ${i + 1}` })),
