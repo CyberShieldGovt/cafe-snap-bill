@@ -30,9 +30,14 @@ import {
   TrendingUp,
   Timer,
   X,
+  Pencil,
+  Plus,
+  CircleCheck,
 } from "lucide-react";
-import { useBills, type Bill } from "@/lib/bills";
+import type { Bill } from "@/lib/bills";
+import { formatDate, formatTime } from "@/lib/bills";
 import { DEMO_SALES, buildDemoBills } from "@/lib/sale";
+import { useSalesReport, nextReportBillNumber } from "@/lib/sales-report";
 import { useAllOrders } from "@/lib/orders";
 import { printBill, getPrinterWidth, setPrinterWidth, type PrinterWidth } from "@/lib/print";
 
@@ -68,6 +73,9 @@ const PRESET_LABELS: Record<Preset, string> = {
   all: "All Time",
 };
 
+/** Major sales items — Irani chai and bun maska lead the report. */
+const MAJOR_ITEMS = ["Irani Dum Chai", "Bun Maska"];
+
 function rangeFor(preset: Preset): { from: number; to: number } {
   const now = new Date();
   switch (preset) {
@@ -89,12 +97,28 @@ function rangeFor(preset: Preset): { from: number; to: number } {
 }
 
 function SalesPage() {
-  const { bills: realBills, remove: removeReal } = useBills();
-  // Demo dataset (see lib/demo-sales.ts). Set DEMO_SALES=false to use real bills.
+  // Saved report: synced once from the frontend dataset, then manual edits only.
+  const {
+    bills: reportBills,
+    loaded: reportLoaded,
+    error: reportError,
+    save: saveReport,
+    remove: removeReport,
+  } = useSalesReport();
+  // Fallback while the saved report loads (or offline): the demo dataset.
   const [demoBills, setDemoBills] = useState<Bill[]>(() => (DEMO_SALES ? buildDemoBills() : []));
-  const bills = DEMO_SALES ? demoBills : realBills;
+  const useSaved = reportLoaded && !reportError;
+  const bills = useSaved ? reportBills : demoBills;
   const remove = (id: string) =>
-    DEMO_SALES ? setDemoBills((prev) => prev.filter((b) => b.id !== id)) : removeReal(id);
+    useSaved ? removeReport(id) : setDemoBills((prev) => prev.filter((b) => b.id !== id));
+  const saveBill = (bill: Bill) => {
+    if (useSaved) saveReport(bill);
+    else setDemoBills((prev) => [bill, ...prev.filter((b) => b.id !== bill.id)]);
+    toast.success(`Bill ${bill.id} saved`);
+    setEditing(null);
+  };
+  const [editing, setEditing] = useState<Bill | "new" | null>(null);
+  const nextId = useMemo(() => nextReportBillNumber(bills), [bills]);
   const orders = useAllOrders();
   const [preset, setPreset] = useState<Preset>("today");
   const [query, setQuery] = useState("");
@@ -131,19 +155,26 @@ function SalesPage() {
   const lowest = ordersToday ? today.reduce((m, b) => Math.min(m, b.total), Infinity) : 0;
   const pendingTables = Object.keys(orders).length;
   const completed = today.length;
+  // Settled tables match the bills: every settled bill is one settled table.
+  const settledTables = today.length;
 
-  // Items sold in the selected range
+  // Items sold in the selected range — major items (chai, bun maska) first
   const itemsSoldToday = useMemo(() => {
-    const map = new Map<string, number>();
+    const map = new Map<string, { qty: number; amount: number }>();
     for (const b of today) {
       for (const l of b.lines) {
-        map.set(l.name, (map.get(l.name) || 0) + l.qty);
+        const cur = map.get(l.name) ?? { qty: 0, amount: 0 };
+        cur.qty += l.qty;
+        cur.amount += l.price * l.qty;
+        map.set(l.name, cur);
       }
     }
-    return Array.from(map.entries())
-      .map(([name, qty]) => ({ name, qty }))
-      .sort((a, b) => b.qty - a.qty);
+    const list = Array.from(map.entries()).map(([name, v]) => ({ name, ...v }));
+    const major = list.filter((i) => MAJOR_ITEMS.includes(i.name)).sort((a, b) => b.qty - a.qty);
+    const rest = list.filter((i) => !MAJOR_ITEMS.includes(i.name)).sort((a, b) => b.qty - a.qty);
+    return [...major, ...rest];
   }, [today]);
+  const majorCount = itemsSoldToday.filter((i) => MAJOR_ITEMS.includes(i.name)).length;
 
   // Month-wise summary (sales, orders, average per day)
   const monthly = useMemo(() => {
