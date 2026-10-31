@@ -152,19 +152,17 @@ export function useSalesReport() {
           // Table is empty and seeding was skipped/flagged: keep local view.
           write(read());
         } else {
-          const fresh = (await (async () => {
-            const r = await sb
-              .from("sales_report_bills")
-              .select(
-                "id, table_id, table_label, lines, total, item_count, status, created_at"
-              )
-              .order("created_at", { ascending: false });
-            return r.data || [];
-          })()) as Parameters<typeof rowToBill>[];
+          const r2 = await sb
+            .from("sales_report_bills")
+            .select(
+              "id, table_id, table_label, lines, total, item_count, status, created_at"
+            )
+            .order("created_at", { ascending: false });
+          const fresh = (r2.data || []) as ReportRow[];
           write(fresh.map(rowToBill));
         }
       } else {
-        write((data as Parameters<typeof rowToBill>[]).map(rowToBill));
+        write((data as ReportRow[]).map(rowToBill));
       }
       if (cancelled) return;
       setError(null);

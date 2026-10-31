@@ -113,8 +113,9 @@ export function buildDemoBills(now = new Date()): Bill[] {
       sum += total;
     }
     monthSold += sum;
+    // All bills settle after 2:30 PM (cafe counter runs 2:30 PM – 10:30 PM)
     const times = dayBills
-      .map(() => 9 * 60 + Math.floor(r() * 810))
+      .map(() => 14 * 60 + 30 + Math.floor(r() * 480))
       .sort((a, b) => a - b);
 
     dayBills.forEach((b, i) => {
