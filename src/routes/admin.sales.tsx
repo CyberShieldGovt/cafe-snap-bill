@@ -406,7 +406,12 @@ function SalesPage() {
                       : "bg-secondary/40 border-border"
                   }`}
                 >
-                  <span className="text-sm font-semibold truncate">{it.name}</span>
+                  <span className="text-sm font-semibold truncate flex items-center gap-1">
+                    {MAJOR_ITEMS.includes(it.name) && (
+                      <span className="shrink-0 text-primary" title="Major seller">★</span>
+                    )}
+                    {it.name}
+                  </span>
                   <span
                     className={`shrink-0 text-xs font-black px-2 py-0.5 rounded-full ${
                       idx === 0 ? "bg-primary text-primary-foreground" : "bg-primary/15 text-primary"
